@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import javax.swing.JPanel;
 
 import mypackages.ninemensmorris.movment.Figure;
+import mypackages.ninemensmorris.movment.OnlineFigure;
 
 public class MyJPanel extends JPanel{
 
@@ -20,6 +21,7 @@ public class MyJPanel extends JPanel{
 	 */
 	
 	private Figure figure;
+	private OnlineFigure ofigure;
 	private boolean figurePlaced;
 	
 	private ArrayList<MyJPanel> neighbors;
@@ -32,6 +34,11 @@ public class MyJPanel extends JPanel{
 	
 	public void setFigure(Figure figure) {
 		this.figure = figure;
+		this.figurePlaced = true;
+	}
+	
+	public void setFigure(OnlineFigure figure) {
+		this.ofigure = figure;
 		this.figurePlaced = true;
 	}
 	

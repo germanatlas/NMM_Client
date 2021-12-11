@@ -1,4 +1,12 @@
 package mypackages.ninemensmorris.graphics;
+/*
+ * every variable should be
+ * sent to the server after input
+ * and then be handled
+ * by the server and
+ * sent to the client
+ * 
+ */
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -12,13 +20,15 @@ import javax.swing.JPanel;
 
 import mypackages.ninemensmorris.game.Game;
 import mypackages.ninemensmorris.movment.Figure;
+import mypackages.ninemensmorris.movment.OnlineFigure;
+import mypackages.ninemensmorris.networking.DataPackage;
 import mypackages.ninemensmorris.networking.OnlineManager;
 import mypackages.ninemensmorris.states.EndState;
 import mypackages.ninemensmorris.states.GameState;
 import mypackages.ninemensmorris.states.MenuState;
 import mypackages.ninemensmorris.states.State;
 
-public class GraphicsJPanel extends JPanel{
+public class OnlineGraphicsJPanel extends JPanel{
 
 	static final long serialVersionUID = 1L;
 	
@@ -49,17 +59,20 @@ public class GraphicsJPanel extends JPanel{
 					mill, 
 					lastMill, 
 					alreadyAdded, 
-					alreadyPressed;
+					alreadyPressed,
+					thisColor;
 	
-	private Figure [] playerOne, 
-					  playerTwo;
+	private OnlineFigure[]	playerOne, 
+					  		playerTwo;
 	
 	private Figure isMoving;
 	
 	private MyJPanel cursor, 
 					 tempPanel;
 	
-	public GraphicsJPanel(Game game, int WIDTH, int HEIGHT) {
+	private OnlineManager oMan;
+	
+	public OnlineGraphicsJPanel(Game game, int WIDTH, int HEIGHT) {
 		
 		this.game = game;
 		
@@ -86,12 +99,12 @@ public class GraphicsJPanel extends JPanel{
 		this.cursor = null;
 		this.tempPanel = null;
 		
-		this.playerOne = new Figure[9];
-		this.playerTwo = new Figure[9];
+		this.playerOne = new OnlineFigure[9];
+		this.playerTwo = new OnlineFigure[9];
 		
 		for(int i = 0; i < 9; i++) {
-			playerOne[i] = new Figure(true, this, 140, 50 + i * 70);
-			playerTwo[i] = new Figure(false, this, 820, 50 + i * 70);
+			playerOne[i] = new OnlineFigure(true, this, 140, 50 + i * 70);
+			playerTwo[i] = new OnlineFigure(false, this, 820, 50 + i * 70);
 		}
 		
 	}
@@ -111,10 +124,24 @@ public class GraphicsJPanel extends JPanel{
 			if(!alreadyPressed) {
 				
 				if(count < 17 && game.getMouseManager().isLeftPressed() && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-					tempPanel = game.getMouseManager().getPanelPressed();		//
-					moveToX = game.getMouseManager().getPanelPressedX() + 5;	//	Transfer
-					moveToY = game.getMouseManager().getPanelPressedY() + 5;	//
-					count++;													//
+					
+					/*
+					 * if(server) receive;
+					 * 
+					 * else {send to server};
+					 * 
+					 */
+					tempPanel = game.getMouseManager().getPanelPressed();
+					moveToX = game.getMouseManager().getPanelPressedX() + 5;
+					moveToY = game.getMouseManager().getPanelPressedY() + 5;
+					
+					
+					/*
+					 * if(!server) {wait for server answer};
+					 * 
+					 * else {do stuff below and send to client};
+					 */
+					count++;
 					//Black
 					if (color) {
 						tempPanel.setFigure(playerOne[count / 2]);
@@ -134,6 +161,10 @@ public class GraphicsJPanel extends JPanel{
 						color = !color;
 					}
 				
+					
+					/*
+					 * if(!server) alreadyPressed = true;
+					 */
 					alreadyPressed = true;
 				}
 				
@@ -142,6 +173,10 @@ public class GraphicsJPanel extends JPanel{
 			//choose moving Piece
 			if(!alreadyPressed) {
 				
+				/*
+				 * if(server) receive;
+				 * else {send to server};
+				 */
 				if(count >= 17 && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
 					alreadyPressed = true;
 					
@@ -160,53 +195,92 @@ public class GraphicsJPanel extends JPanel{
 			}
 			
 			//MovePhase
-			if(isMoving != null) {
+			if(/*received from server*/ isMoving != null) {
 				//black
-				if(playerOneFigureCount > 3 && color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+				if(/*received from server*/ playerOneFigureCount > 3 && color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+					
+					/*
+					 * if(server) receive;
+					 * else{send to server;}
+					 */
 					tempPanel = game.getMouseManager().getPanelPressed();
 				
-					if(tempPanel.isNeighborFrom(cursor)) {
+					
+					if(/*received from server*/ tempPanel.isNeighborFrom(cursor)) {
+						
+						/*
+						 * if(server) receive;
+						 * else{send to server;}
+						 */
 						moveToX = game.getMouseManager().getPanelPressedX() + 5;
 						moveToY = game.getMouseManager().getPanelPressedY() + 5;
+						
+						/*
+						 * if(server){move piece and send position to client}
+						 * else{receive position from server}
+						 */
 						isMoving.move(moveToX, moveToY);
 						tempPanel.setFigure(isMoving);
 						
-						color = false;
+						/*received from server and handled by server*/ color = false;
 						
+						/*
+						 * if(server) {delete figure and send to clients}
+						 * else{receive from server}
+						 */
 						cursor.delFigure();
 						isMoving = null;
 						
 //Max
-						if(checkMill(tempPanel)) {
+						if(/*receive from server*/ checkMill(tempPanel)) {
+							/*
+							 * if(server) {renew variables and send to clients}
+							 * else{receive}
+							 */
+							
 							color = !color;
 							roundsWithoutMill = 0;
 							lastMill = color;
 							mill = true;
 						}
-						else if(lastMill == color) {
+						else if(/*receive from server*/ lastMill == color) {
+							/*
+							 * if(server){increment var; send to client}
+							 * else{receive}
+							 */
 							roundsWithoutMill++;
 						}
 						
-						tempPanel = null;
+						/*handled by server and the sent to clients*/ tempPanel = null;
 						
-						if(checkForRepetition(color)) {
+						if(/*received from server*/ checkForRepetition(color)) {
 							repetition++;
 						}
 						else {
 							repetition = 0;
 						}
-				
 					}
 				}
 			
 //Daniel			
-				//white
+				/* 
+				 * white
+				 *
+				 * is handled just like black
+				 *
+				 */
 				if(playerTwoFigureCount > 3 && !color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+					
+					
 					tempPanel = game.getMouseManager().getPanelPressed();
 				
+					
+					
 					if (tempPanel.isNeighborFrom(cursor) || cursor.isNeighborFrom(tempPanel)) {
 						moveToX = game.getMouseManager().getPanelPressedX() + 5;
 						moveToY = game.getMouseManager().getPanelPressedY() + 5;
+						
+						
 						isMoving.move(moveToX, moveToY);
 						tempPanel.setFigure(isMoving);
 						
@@ -215,7 +289,7 @@ public class GraphicsJPanel extends JPanel{
 						cursor.delFigure();
 						isMoving = null;
 						
-//Max
+//Max					
 						if(checkMill(tempPanel)) {
 							color = !color;
 							roundsWithoutMill = 0;
@@ -241,15 +315,27 @@ public class GraphicsJPanel extends JPanel{
 //Daniel
 			//JumpPhase
 		
-			//black
-			if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
+			/*
+			 * black
+			 * 
+			 * if(server){receive position clicked from client}
+			 * else{send input(tempPanel) to server}
+			 */
+			if(/*receive from server*/ playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
 				if(isMoving != null) {
 				
-					if(color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+					if(/*receive from server*/ color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						
+						/*
+						 * if(server){move figure and send data to clients}
+						 * else{receive data from server}
+						 * 
+						 */
 						tempPanel = game.getMouseManager().getPanelPressed();
 					
 						moveToX = game.getMouseManager().getPanelPressedX() + 5;
 						moveToY = game.getMouseManager().getPanelPressedY() + 5;
+						
 						isMoving.move(moveToX, moveToY);
 						tempPanel.setFigure(isMoving);
 						color = false;
@@ -258,18 +344,31 @@ public class GraphicsJPanel extends JPanel{
 						isMoving = null;
 
 //Max						
-						if (checkMill(tempPanel)) {
+						if (/*receive from server*/ checkMill(tempPanel)) {
+							/*
+							 * if(server){handle active player and send to clients}
+							 * else{receive from server}
+							 * 
+							 */
 							color = !color;
 							lastMill = color;
 							mill = true;
 						}
-						else if(lastMill == color) {
+						else if(/*receive from server*/ lastMill == color) {
 							roundsWithoutMill++;
 						}
-						
+						/*
+						 * if(server){tempPanel = null; send to client}
+						 * else{receive from server}
+						 * 
+						 */
 						tempPanel = null;
 						
-						if(checkForRepetition(color)) {
+						if(/*receive from server*/ checkForRepetition(color)) {
+							/*
+							 * if(server){renew repetition; send to clients}
+							 * else{receive from server}
+							 */
 							repetition++;
 						}
 						else {
@@ -281,7 +380,12 @@ public class GraphicsJPanel extends JPanel{
 			}
 			
 //Daniel
-			//white
+			/*
+			 * white
+			 * 
+			 * is handled just like black
+			 * 
+			 */
 			if(playerTwoFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
 				if(isMoving != null) {
 					
@@ -324,21 +428,21 @@ public class GraphicsJPanel extends JPanel{
 			//checkForEnd
 			if(color) {
 				
-				if(checkStalemate()) {
-					endState = new EndState(game);
-					State.setCurrentState(endState);
+				if(/*received from server*/ checkStalemate()) {
+					/*done by server*/ 		endState = new EndState(game);
+					/*received from server*/State.setCurrentState(endState);
 				}
-				if(playerOneFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+				if(/*same as stalemate server wise*/ playerOneFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
 					endState = new EndState(game, !color);
 					State.setCurrentState(endState);
 				}
-				else if(playerOneFigureCount < 3) {
+				else if(/*same as stalemate server wise*/ playerOneFigureCount < 3) {
 					endState = new EndState(game, !color);
 					State.setCurrentState(endState);
 				}
 			}
 			else {
-				
+				/*same as black server wise*/
 				if(checkStalemate()) {
 					endState = new EndState(game);
 					State.setCurrentState(endState);
@@ -357,7 +461,22 @@ public class GraphicsJPanel extends JPanel{
 		
 //Daniel
 		//delete Stone
-		
+		/*
+		 * server:
+		 * - send variables to clients
+		 * - receive request of deletion of stone
+		 * - handle request
+		 * - answer with deleted and new variables or
+		 *   can't be deleted
+		 *   
+		 * client:
+		 * - choose stone to be deleted
+		 * - send to server
+		 * - receive answer and renew Variables
+		 *   or choose new stone if the other
+		 *   couldn't be deleted
+		 * 
+		 */
 		else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced())
 		{
 			alreadyPressed = true;
@@ -418,40 +537,24 @@ public class GraphicsJPanel extends JPanel{
 			count++;
 		}
 
-		//first field that can be repeated
+		//first field that can be repeated (should be saved in the server and if needed sent to the clients)
 				if(count > 17 && !alreadyAdded) {
-					MyJPanel[][] f = game.getWindow().getJPanel();
-					String s = "";
 					
-					for (int i = 0; i < f.length; i++) {
-						for (int j = 0; j < f[i].length; j++) {
-							if (f[i][j].isFigurePlaced()) {
-								if (f[i][j].getFigure().getColor()) {
-									
-									s += "2";
-									
-								}
-								else {
-									
-									s += "1";
-									
-								}
-							}
-							else {
-								
-								s += "0";
-								
-							}
-						}
-					}
-					repetitiveField.add(s);
-					alreadyAdded = true;
+					String s = getStringFromBoard();
+					/*save in server and send to client if needed*/ repetitiveField.add(s);
+					/*handled by server*/ alreadyAdded = true;
 				}
 
 //Daniel
 		//messages		
 
-		if(count < 17) {
+				
+		/*
+		 * shall be handled by server
+		 * and sent to the clients
+		 * and afterwards shown in the clients		
+		 */
+		if(/*for example this shall be received by the client from the server*/ count < 17) {
 			if(color) {
 				if(!mill) {
 					game.getWindow().getLabel().setText("Black: place a stone");
@@ -507,10 +610,108 @@ public class GraphicsJPanel extends JPanel{
 				}
 			}
 		}
-		this.repaint();
+		/*this can be done by server and clients*/ this.repaint();
 		
 	}
 	
+	private void sendOnlineData(int status, String fromCoords, String toCoords) {
+		
+		String s = fromCoords + "_" + toCoords;
+		oMan.sendData(new DataPackage(status, s));
+		
+	}
+	
+	private void getOnlineData() {
+		
+		DataPackage dp = oMan.receiveData();
+		
+		if(dp.getStatus() <= 1) {
+			
+			if(dp.getStatus() == 0) {
+				
+				count++;
+				
+			}
+			
+			//TODO
+			//Spielstatus anpassen
+			drawBoardFromString(dp.getMove());
+			
+		} else if(dp.getStatus() <= 4) {
+			
+			//TODO
+			//End Game Accordingly
+			drawBoardFromString(dp.getMove());
+			
+		} else if(dp.getStatus() <= 6) {
+
+			drawBoardFromString(dp.getMove());
+			
+		} else if(dp.getStatus() == 99) {
+			
+			thisColor = Integer.parseInt(dp.getMove())%10 == 1;
+			reset(thisColor);
+			
+		}
+		
+	}
+	
+	private String getStringFromBoard() {
+
+		MyJPanel[][] f = game.getWindow().getJPanel();
+		String s = "";
+		
+		for (int i = 0; i < f.length; i++) {
+			for (int j = 0; j < f[i].length; j++) {
+				if (f[i][j].isFigurePlaced()) {
+					if (f[i][j].getFigure().getColor()) {
+						
+						s += "2";
+						
+					}
+					else {
+						
+						s += "1";
+						
+					}
+				}
+				else {
+					
+					s += "0";
+					
+				}
+			}
+		}
+		
+		return s;
+		
+	}
+	
+	private void drawBoardFromString(String move) {
+		
+		MyJPanel[][] f = game.getWindow().getJPanel();
+		String[] data = move.split("_");
+		
+		String[] from = data[0].split("");
+		String[] to = data[1].split("");
+		
+		
+		
+		if(!data[1].equals("99")) {
+			
+			f[Integer.parseInt(from[0])][Integer.parseInt(from[1])].getFigure().move(Integer.parseInt(to[0]), Integer.parseInt(to[1]));
+			
+		} else {
+			
+			//TODO Color Figure Count --;
+			f[Integer.parseInt(from[0])][Integer.parseInt(from[1])].delFigure();
+			
+			
+		}
+		
+		
+	}
+
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -575,7 +776,7 @@ public class GraphicsJPanel extends JPanel{
 		
 		
 		
-		if(State.getCurrentState() instanceof MenuState && game.getWindow().isRunning()){
+		if(/*received from the server*/ State.getCurrentState() instanceof MenuState && game.getWindow().isRunning()){
 			for (int i = 0; i < 9; i++) {
 				if(playerOne[i] != null) {
 					playerOne[i].render(g);
@@ -587,7 +788,7 @@ public class GraphicsJPanel extends JPanel{
 		}
 		
 		//game ended
-		else if(State.getCurrentState() instanceof EndState) {
+		else if(/*received from the server*/ State.getCurrentState() instanceof EndState) {
 			game.getWindow().setRunning(false);
 			EndState tempState = (EndState) endState;
 			if(tempState.getColor() != null && tempState.getColor()) {
@@ -655,12 +856,39 @@ public class GraphicsJPanel extends JPanel{
 		this.cursor = null;
 		this.tempPanel = null;
 		
-		this.playerOne = new Figure[9];
-		this.playerTwo = new Figure[9];
+		this.playerOne = new OnlineFigure[9];
+		this.playerTwo = new OnlineFigure[9];
 		
 		for(int i = 0; i < 9; i++) {
-			playerOne[i] = new Figure(true, this, 140, 50 + i * 70);
-			playerTwo[i] = new Figure(false, this, 820, 50 + i * 70);
+			playerOne[i] = new OnlineFigure(true, this, 140, 50 + i * 70);
+			playerTwo[i] = new OnlineFigure(false, this, 820, 50 + i * 70);
+		}
+		
+	}
+	
+	public void reset(boolean c) {
+		this.repetition = 0;
+		this.repetitiveField = new ArrayList<String>();
+		this.roundsWithoutMill = 0;
+		this.playerOneFigureCount = 9;
+		this.playerTwoFigureCount = 9;
+		this.count = -1;
+		
+		this.mill = false;
+		this.color = c;
+		this.lastMill = false;
+		this.alreadyPressed = false;
+		
+		this.isMoving = null;
+		this.cursor = null;
+		this.tempPanel = null;
+		
+		this.playerOne = new OnlineFigure[9];
+		this.playerTwo = new OnlineFigure[9];
+		
+		for(int i = 0; i < 9; i++) {
+			playerOne[i] = new OnlineFigure(true, this, 140, 50 + i * 70);
+			playerTwo[i] = new OnlineFigure(false, this, 820, 50 + i * 70);
 		}
 		
 	}
@@ -808,11 +1036,11 @@ public class GraphicsJPanel extends JPanel{
 		
 	}
 	
-	public Figure [] getPlayerOne() {
+	public OnlineFigure [] getPlayerOne() {
 		return this.playerOne;
 	}
 	
-	public Figure [] getPlayerTwo() {
+	public OnlineFigure [] getPlayerTwo() {
 		return this.playerTwo;
 	}
 	
