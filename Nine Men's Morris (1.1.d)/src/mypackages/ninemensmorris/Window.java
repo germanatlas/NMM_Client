@@ -284,10 +284,11 @@ public class Window extends JFrame{
 				}
 				if(e.getSource() == joinButton) {
 					//TODO
-					//Start Client
 					//Create Game
 					
 					oMan = new OnlineManager(game);
+					setRunning(true);
+					game.reset();
 				}
 				if(e.getSource() == optionButton) {
 					//TODO
