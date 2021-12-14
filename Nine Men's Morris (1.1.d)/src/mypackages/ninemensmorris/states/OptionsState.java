@@ -71,7 +71,7 @@ public class OptionsState extends State {
 	
 	public String getTFContent() {
 		
-		return "Test";
+		return addrTF.getText();
 		
 	}
 

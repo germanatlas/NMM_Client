@@ -126,6 +126,8 @@ public class OnlineGraphicsJPanel extends JPanel{
 			
 		}
 		
+		System.out.println("IST ONLINE");
+		
 		if(!mill) {
 			//PlacingPhase
 		
@@ -505,6 +507,7 @@ public class OnlineGraphicsJPanel extends JPanel{
 	private void sendOnlineData(int status, String fromCoords, String toCoords) {
 		
 		String s = fromCoords + "_" + toCoords;
+		System.out.println(s);
 		oMan.sendData(new DataPackage(status, s));
 		activeUser = false;
 		

@@ -117,19 +117,39 @@ public class Game implements Runnable{
 	}
 	
 	//resets the game to play a new Game
-	public void reset() {
-		for (int i = 0; i < 7; i++) {
-			for(int j = 0; j < 7; j++) {
-				window.getJPanel()[i][j].delFigure();
+	public void reset(boolean isOnline) {
+		
+		if(isOnline) {
+			
+			for (int i = 0; i < 7; i++) {
+				for(int j = 0; j < 7; j++) {
+					window.getJPanel()[i][j].delFigure();
+				}
 			}
+			
+			for (int i = 0; i < 9; i++) {
+				window.getOnlinePanel().getPlayerOne()[i].move(140, 50 + i * 70);
+				window.getOnlinePanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+			}
+			
+			window.getOnlinePanel().reset(true);
+			
+		} else {
+			
+			for (int i = 0; i < 7; i++) {
+				for(int j = 0; j < 7; j++) {
+					window.getJPanel()[i][j].delFigure();
+				}
+			}
+			
+			for (int i = 0; i < 9; i++) {
+				window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
+				window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+			}
+			
+			window.getPanel().reset();
+			
 		}
-		
-		for (int i = 0; i < 9; i++) {
-			window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
-			window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
-		}
-		
-		window.getPanel().reset();
 		
 		State.setCurrentState(gameState);
 		

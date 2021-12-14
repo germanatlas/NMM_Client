@@ -67,7 +67,7 @@ public class OnlineManager {
 		if(!activeClient) {
 			
 			String address = game.getWindow().getAddress();
-			if(address == "") address = "localhost"; //TODO RPI
+			if(address == "") address = "localhost";
 			try {
 				client = new Client(address, port);
 				activeClient = true;
@@ -94,6 +94,10 @@ public class OnlineManager {
 			
 		}
 		
+	}
+	
+	public boolean getIfActive() {
+		return activeClient;
 	}
 
 }

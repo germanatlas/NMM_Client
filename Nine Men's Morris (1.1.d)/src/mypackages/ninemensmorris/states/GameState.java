@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 
 import mypackages.ninemensmorris.game.Game;
 import mypackages.ninemensmorris.graphics.GraphicsJPanel;
+import mypackages.ninemensmorris.graphics.OnlineGraphicsJPanel;
 
 public class GameState extends State{
 	
@@ -18,6 +19,7 @@ public class GameState extends State{
 	 */
 	
 	private GraphicsJPanel jPanel;
+	private OnlineGraphicsJPanel ojPanel;
 	
 	private JButton startButton, 
 					closeButton, 
@@ -27,17 +29,20 @@ public class GameState extends State{
 	
 	private JPanel panel;
 	
-	private boolean escapePressed;
+	private boolean	escapePressed,
+					isOnline;
 	
 	public GameState(Game game) {
 		super(game);
 		
 		this.jPanel = game.getWindow().getPanel();
+		this.ojPanel = game.getWindow().getOnlinePanel();
 		this.startButton = game.getWindow().getStartButton();
 		this.continueButton = game.getWindow().getContinueButton();
 		this.joinButton = game.getWindow().getJoinButton();
 		this.closeButton = game.getWindow().getCloseButton();
 		this.optionButton = game.getWindow().getOptionButton();
+		this.isOnline = game.getWindow().getIfOnline();
 		
 		
 		
@@ -58,7 +63,11 @@ public class GameState extends State{
 			State.setCurrentState(game.getMenuState());
 		}
 		
-		jPanel.tick();
+		if(isOnline) {
+			ojPanel.tick();
+		} else {
+			jPanel.tick();
+		}
 		panel.setVisible(true);
 		
 	}

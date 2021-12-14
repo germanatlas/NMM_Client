@@ -19,6 +19,7 @@ import mypackages.ninemensmorris.game.Game;
 import mypackages.ninemensmorris.graphics.GraphicsJPanel;
 import mypackages.ninemensmorris.graphics.GraphicsLoader;
 import mypackages.ninemensmorris.graphics.MyJPanel;
+import mypackages.ninemensmorris.graphics.OnlineGraphicsJPanel;
 import mypackages.ninemensmorris.networking.OnlineManager;
 import mypackages.ninemensmorris.states.State;
 
@@ -37,6 +38,7 @@ public class Window extends JFrame{
 	
 	private JLabel label;
 	private GraphicsJPanel panel;
+	private OnlineGraphicsJPanel opanel;
 	private GraphicsLoader graphicsLoader;
 	private MyJPanel jPanel[][];
 	private Game game;
@@ -57,6 +59,8 @@ public class Window extends JFrame{
 	private final GridBagConstraints STANDARDCONSTRAINTS = new GridBagConstraints();
 
 	private String inetAddress;
+
+	private boolean isOnline;
 
 //Daniel	
 	public Window(Game game) {
@@ -82,6 +86,7 @@ public class Window extends JFrame{
 		frame = new JFrame(TITLE);
 		
 		panel = new GraphicsJPanel(game, WIDTH, HEIGHT);
+		opanel = new OnlineGraphicsJPanel(game, WIDTH, HEIGHT);
 		jPanel = new MyJPanel[7][7];
 		messagePanel = new JPanel();
 		
@@ -108,6 +113,11 @@ public class Window extends JFrame{
 		panel.setLayout(null);
 		panel.setVisible(true);
 		panel.addKeyListener(game.getKeyboardManager());
+		
+		opanel.setFocusable(true);
+		opanel.setLayout(null);
+		opanel.setVisible(true);
+		opanel.addKeyListener(game.getKeyboardManager());
 		
 		
 		
@@ -274,7 +284,8 @@ public class Window extends JFrame{
 				
 				if(e.getSource() == startButton) {
 					setRunning(true);
-					game.reset();
+					isOnline = false;
+					game.reset(isOnline);
 				}
 				if(e.getSource() == continueButton) {
 					State.setCurrentState(game.getGameState());
@@ -287,13 +298,18 @@ public class Window extends JFrame{
 					//Create Game
 					
 					oMan = new OnlineManager(game);
-					setRunning(true);
-					game.reset();
+					if(oMan.getIfActive()) {
+
+						setRunning(true);
+						isOnline = true;
+						game.reset(isOnline);
+						
+					}
 				}
 				if(e.getSource() == optionButton) {
 					//TODO
 					//Open Options
-					//State.setCurrentState(game.getOptionsState());
+					State.setCurrentState(game.getOptionsState());
 						//Username?
 				}
 				if(e.getSource() == exitButton) {
@@ -301,7 +317,7 @@ public class Window extends JFrame{
 					//Exit Options
 					inetAddress = game.getOptionsState().getTFContent();
 					State.setCurrentState(game.getMenuState());
-					System.out.println(inetAddress);
+					//System.out.println(inetAddress);
 					
 				}
 				
@@ -390,6 +406,15 @@ public class Window extends JFrame{
 		panel.add(closeButton);
 		panel.add(exitButton);
 		frame.add(panel, STANDARDCONSTRAINTS);
+		
+		opanel.add(messagePanel);
+		opanel.add(startButton);
+		opanel.add(continueButton);
+		opanel.add(joinButton);
+		opanel.add(optionButton);
+		opanel.add(closeButton);
+		opanel.add(exitButton);
+		frame.add(opanel, STANDARDCONSTRAINTS);
 		
 		frame.setVisible(true);
 		frame.pack();
@@ -526,6 +551,15 @@ public class Window extends JFrame{
 		
 		return null;
 		
+	}
+
+	public boolean getIfOnline() {
+		return isOnline;
+	}
+
+	public OnlineGraphicsJPanel getOnlinePanel() {
+		// TODO Auto-generated method stub
+		return opanel;
 	}
 	
 }
