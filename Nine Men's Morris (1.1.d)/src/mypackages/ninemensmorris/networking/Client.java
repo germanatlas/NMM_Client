@@ -15,7 +15,7 @@ import java.net.UnknownHostException;
 
 public class Client {
 
-	private static final int TIMEOUT = 10000;
+	private static final int TIMEOUT = 1000;
 	private BufferedInputStream in;
 	private BufferedOutputStream out;
 	private Socket client;
@@ -67,7 +67,7 @@ public class Client {
 				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
-				System.out.println("Receiving Error:\n" + e);
+				System.out.println("Receiving Error:\n"); e.printStackTrace();
 				return null;
 			}
 		} else {

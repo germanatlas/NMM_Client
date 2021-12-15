@@ -10,6 +10,7 @@ public class OnlineManager {
 	private final int port;
 	private boolean	activeClient;
 	private Game game;
+	//private boolean init;
 	
 	public OnlineManager(Game game) {
 		
@@ -19,30 +20,37 @@ public class OnlineManager {
 		
 		createClient();
 		
-		new Thread(() -> {
+		if(activeClient) {
 			
-			connectionloop:
-			while(true) {
+			new Thread(() -> {
 				
-				if(activeClient) {
+				connectionloop:
+				while(true) {
 					
-					while(client.getIfActive());
-					client.stopClient();
-					activeClient = false;
-					System.out.println("Connection to Server ended."); //TODO
-					break connectionloop;
+					if(activeClient) {
+						
+						while(client.getIfActive());
+						client.stopClient();
+						activeClient = false;
+						game.getWindow().setIfClientActive(activeClient);
+						System.out.println("Connection to Server ended."); //TODO
+						break connectionloop;
+						
+					}
 					
 				}
 				
-			}
+			}).start();
 			
-		}).start();
+		}
+		
+		//init = true;
 		
 	}
 	
 	public void sendData(DataPackage data) {
 		
-		if(activeClient) {
+		if(activeClient || game.getWindow().getIfClientActive()) {
 			
 			client.sendData(data);
 		
@@ -52,7 +60,7 @@ public class OnlineManager {
 	
 	public DataPackage receiveData() {
 		
-		if(activeClient) {
+		if(activeClient || game.getWindow().getIfClientActive()) {
 			
 			return (DataPackage) client.receiveData();
 			
@@ -66,11 +74,13 @@ public class OnlineManager {
 		
 		if(!activeClient) {
 			
-			String address = game.getWindow().getAddress();
+			String address = ""; //game.getWindow().getAddress();
 			if(address == "") address = "localhost";
 			try {
 				client = new Client(address, port);
 				activeClient = true;
+				game.getWindow().setIfClientActive(activeClient);
+				System.out.println("Connected Client.");
 			} catch (IOException e) {
 				System.out.println("Client Start Error:\n" + e);
 			}

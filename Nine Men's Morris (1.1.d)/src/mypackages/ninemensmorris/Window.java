@@ -19,7 +19,6 @@ import mypackages.ninemensmorris.game.Game;
 import mypackages.ninemensmorris.graphics.GraphicsJPanel;
 import mypackages.ninemensmorris.graphics.GraphicsLoader;
 import mypackages.ninemensmorris.graphics.MyJPanel;
-import mypackages.ninemensmorris.graphics.OnlineGraphicsJPanel;
 import mypackages.ninemensmorris.networking.OnlineManager;
 import mypackages.ninemensmorris.states.State;
 
@@ -38,14 +37,14 @@ public class Window extends JFrame{
 	
 	private JLabel label;
 	private GraphicsJPanel panel;
-	private OnlineGraphicsJPanel opanel;
 	private GraphicsLoader graphicsLoader;
 	private MyJPanel jPanel[][];
 	private Game game;
 	private JPanel messagePanel;
 	private OnlineManager oMan;
 	
-	private boolean running;
+	private boolean running,
+					activeClient;
 	
 	private Font chalk;
 	private final Color GREENISH = new Color(53, 104, 45);
@@ -81,12 +80,14 @@ public class Window extends JFrame{
 	
 	private void createWindow() {
 		running = false;
+		
 		inetAddress = "";
+		oMan = new OnlineManager(game);
+		activeClient = false;
 		
 		frame = new JFrame(TITLE);
 		
-		panel = new GraphicsJPanel(game, WIDTH, HEIGHT);
-		opanel = new OnlineGraphicsJPanel(game, WIDTH, HEIGHT);
+		panel = new GraphicsJPanel(game, WIDTH, HEIGHT, oMan);
 		jPanel = new MyJPanel[7][7];
 		messagePanel = new JPanel();
 		
@@ -113,11 +114,6 @@ public class Window extends JFrame{
 		panel.setLayout(null);
 		panel.setVisible(true);
 		panel.addKeyListener(game.getKeyboardManager());
-		
-		opanel.setFocusable(true);
-		opanel.setLayout(null);
-		opanel.setVisible(true);
-		opanel.addKeyListener(game.getKeyboardManager());
 		
 		
 		
@@ -285,6 +281,7 @@ public class Window extends JFrame{
 				if(e.getSource() == startButton) {
 					setRunning(true);
 					isOnline = false;
+					panel.setOnline(isOnline);
 					game.reset(isOnline);
 				}
 				if(e.getSource() == continueButton) {
@@ -302,6 +299,8 @@ public class Window extends JFrame{
 
 						setRunning(true);
 						isOnline = true;
+						panel.setOnline(isOnline);
+						panel.setOnlineManager(oMan);
 						game.reset(isOnline);
 						
 					}
@@ -406,15 +405,6 @@ public class Window extends JFrame{
 		panel.add(closeButton);
 		panel.add(exitButton);
 		frame.add(panel, STANDARDCONSTRAINTS);
-		
-		opanel.add(messagePanel);
-		opanel.add(startButton);
-		opanel.add(continueButton);
-		opanel.add(joinButton);
-		opanel.add(optionButton);
-		opanel.add(closeButton);
-		opanel.add(exitButton);
-		frame.add(opanel, STANDARDCONSTRAINTS);
 		
 		frame.setVisible(true);
 		frame.pack();
@@ -556,10 +546,13 @@ public class Window extends JFrame{
 	public boolean getIfOnline() {
 		return isOnline;
 	}
-
-	public OnlineGraphicsJPanel getOnlinePanel() {
-		// TODO Auto-generated method stub
-		return opanel;
+	
+	public boolean getIfClientActive() {
+		return activeClient;
+	}
+	
+	public void setIfClientActive(boolean b) {
+		this.activeClient = b;
 	}
 	
 }

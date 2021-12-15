@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 
 import mypackages.ninemensmorris.game.Game;
 import mypackages.ninemensmorris.movment.Figure;
+import mypackages.ninemensmorris.networking.DataPackage;
 import mypackages.ninemensmorris.networking.OnlineManager;
 import mypackages.ninemensmorris.states.EndState;
 import mypackages.ninemensmorris.states.GameState;
@@ -35,11 +36,11 @@ public class GraphicsJPanel extends JPanel{
 	private int moveToX, 
 				moveToY, 
 				repetition, 
-				roundsWithoutMill;
-	
-	private int count, 
+				roundsWithoutMill,
+				count, 
 				playerOneFigureCount, 
-				playerTwoFigureCount;
+				playerTwoFigureCount,
+				endID;
 	
 	private Random random;
 	
@@ -49,17 +50,22 @@ public class GraphicsJPanel extends JPanel{
 					mill, 
 					lastMill, 
 					alreadyAdded, 
-					alreadyPressed;
+					alreadyPressed,
+					activeUser,
+					online,
+					stalemateOnline;
 	
 	private Figure [] playerOne, 
 					  playerTwo;
 	
 	private Figure isMoving;
 	
+	private OnlineManager oMan;
+	
 	private MyJPanel cursor, 
 					 tempPanel;
 	
-	public GraphicsJPanel(Game game, int WIDTH, int HEIGHT) {
+	public GraphicsJPanel(Game game, int WIDTH, int HEIGHT, OnlineManager oMan) {
 		
 		this.game = game;
 		
@@ -86,6 +92,7 @@ public class GraphicsJPanel extends JPanel{
 		this.cursor = null;
 		this.tempPanel = null;
 		
+		this.oMan = oMan;
 		this.playerOne = new Figure[9];
 		this.playerTwo = new Figure[9];
 		
@@ -100,231 +107,170 @@ public class GraphicsJPanel extends JPanel{
 	
 	//Daniel
 		
-		if(!game.getMouseManager().isLeftPressed()) {
-			alreadyPressed = false;
-		}
-		
-		if(!mill) {
-			//PlacingPhase
-		
+		if(online) {
 			
-			if(!alreadyPressed) {
+			if(!game.getMouseManager().isLeftPressed()) {
+				alreadyPressed = false;
+			}
+			
+			if(!activeUser) {
 				
-				if(count < 17 && game.getMouseManager().isLeftPressed() && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-					tempPanel = game.getMouseManager().getPanelPressed();		//
-					moveToX = game.getMouseManager().getPanelPressedX() + 5;	//	Transfer
-					moveToY = game.getMouseManager().getPanelPressedY() + 5;	//
-					count++;													//
-					//Black
-					if (color) {
-						tempPanel.setFigure(playerOne[count / 2]);
-						if (!mill) {
-							playerOne[count / 2].move(moveToX, moveToY);
-						}
-						
-						color = !color;
-					}
-					//White
-					else {
-						tempPanel.setFigure(playerTwo[count / 2]);
-						if (!mill) {
-							playerTwo[count / 2].move(moveToX, moveToY);
-						}
-						
-						color = !color;
-					}
-				
-					alreadyPressed = true;
-				}
+				getOnlineData();
 				
 			}
-		
-			//choose moving Piece
-			if(!alreadyPressed) {
+			
+			//System.out.println("IST ONLINE");
+			
+			if(!mill) {
+				//PlacingPhase
+			
 				
-				if(count >= 17 && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-					alreadyPressed = true;
+				if(!alreadyPressed) {
 					
+					if(count < 17 && game.getMouseManager().isLeftPressed() && !game.getMouseManager().getPanelPressed().isFigurePlaced() && activeUser) {
+						
+						tempPanel = game.getMouseManager().getPanelPressed();
+						moveToX = game.getMouseManager().getPanelPressedX() + 5;
+						moveToY = game.getMouseManager().getPanelPressedY() + 5;
+						
+						count++;
+						
+						if (activeUser) {
+							tempPanel.setFigure(playerOne[count / 2]);
+							if (!mill) {
+								playerOne[count / 2].move(moveToX, moveToY);
+							}
+
+							sendOnlineData(0, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							
+						}
+						alreadyPressed = true;
+					}
+					
+				}
+			
+				//choose moving Piece
+				if(!alreadyPressed) {
+					
+					/*
+					 * if(server) receive;
+					 * else {send to server};
+					 */
+					if(count >= 17 && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						alreadyPressed = true;
+						
+						//black
+						if (color && game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
+							isMoving = game.getMouseManager().getPanelPressed().getFigure();
+							cursor = game.getMouseManager().getPanelPressed();
+						}
+					
+						//white
+						if(!color && !game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
+							isMoving = game.getMouseManager().getPanelPressed().getFigure();
+							cursor = game.getMouseManager().getPanelPressed();
+						}
+					}
+				}
+				
+				//MovePhase
+				if(isMoving != null) {
 					//black
-					if (color && game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
-						isMoving = game.getMouseManager().getPanelPressed().getFigure();
-						cursor = game.getMouseManager().getPanelPressed();
-					}
-				
-					//white
-					if(!color && !game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
-						isMoving = game.getMouseManager().getPanelPressed().getFigure();
-						cursor = game.getMouseManager().getPanelPressed();
-					}
-				}
-			}
-			
-			//MovePhase
-			if(isMoving != null) {
-				//black
-				if(playerOneFigureCount > 3 && color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-					tempPanel = game.getMouseManager().getPanelPressed();
-				
-					if(tempPanel.isNeighborFrom(cursor)) {
-						moveToX = game.getMouseManager().getPanelPressedX() + 5;
-						moveToY = game.getMouseManager().getPanelPressedY() + 5;
-						isMoving.move(moveToX, moveToY);
-						tempPanel.setFigure(isMoving);
+					if(playerOneFigureCount > 3 && color && !game.getMouseManager().getPanelPressed().isFigurePlaced() && activeUser) {
 						
-						color = false;
-						
-						cursor.delFigure();
-						isMoving = null;
-						
-//Max
-						if(checkMill(tempPanel)) {
-							color = !color;
-							roundsWithoutMill = 0;
-							lastMill = color;
-							mill = true;
-						}
-						else if(lastMill == color) {
-							roundsWithoutMill++;
-						}
-						
-						tempPanel = null;
-						
-						if(checkForRepetition(color)) {
-							repetition++;
-						}
-						else {
-							repetition = 0;
-						}
-				
-					}
-				}
-			
-//Daniel			
-				//white
-				if(playerTwoFigureCount > 3 && !color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-					tempPanel = game.getMouseManager().getPanelPressed();
-				
-					if (tempPanel.isNeighborFrom(cursor) || cursor.isNeighborFrom(tempPanel)) {
-						moveToX = game.getMouseManager().getPanelPressedX() + 5;
-						moveToY = game.getMouseManager().getPanelPressedY() + 5;
-						isMoving.move(moveToX, moveToY);
-						tempPanel.setFigure(isMoving);
-						
-						color = true;
-						
-						cursor.delFigure();
-						isMoving = null;
-						
-//Max
-						if(checkMill(tempPanel)) {
-							color = !color;
-							roundsWithoutMill = 0;
-							lastMill = color;
-							mill = true;
-						}
-						else if(lastMill == color) {
-							roundsWithoutMill++;
-						}
-						
-						tempPanel = null;
-						
-						if(checkForRepetition(color)) {
-							repetition++;
-						}
-						else {
-							repetition = 0;
-						}
-					}
-				}
-			}
-
-//Daniel
-			//JumpPhase
-		
-			//black
-			if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
-				if(isMoving != null) {
-				
-					if(color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
 						tempPanel = game.getMouseManager().getPanelPressed();
 					
-						moveToX = game.getMouseManager().getPanelPressedX() + 5;
-						moveToY = game.getMouseManager().getPanelPressedY() + 5;
-						isMoving.move(moveToX, moveToY);
-						tempPanel.setFigure(isMoving);
-						color = false;
 						
-						cursor.delFigure();
-						isMoving = null;
+						if(tempPanel.isNeighborFrom(cursor)) {
+							
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+							
+							isMoving.move(moveToX, moveToY);
+							tempPanel.setFigure(isMoving);
+							
+							cursor.delFigure();
+							isMoving = null;
+							
+	//Max
+							if(checkMill(tempPanel)) {
+								
+								roundsWithoutMill = 0;
+								lastMill = color;
+								mill = true;
+							}
+							else if(lastMill == color) {
+								
+								roundsWithoutMill++;
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+						}
+					}
+					
+				}
 
-//Max						
-						if (checkMill(tempPanel)) {
-							color = !color;
-							lastMill = color;
-							mill = true;
-						}
-						else if(lastMill == color) {
-							roundsWithoutMill++;
-						}
+	//Daniel
+				//JumpPhase
+				if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
+					
+					if(isMoving != null) {
+					
+						if(color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+							
+							tempPanel = game.getMouseManager().getPanelPressed();
 						
-						tempPanel = null;
-						
-						if(checkForRepetition(color)) {
-							repetition++;
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+
+							sendOnlineData(1, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							isMoving.move(moveToX, moveToY);
+							tempPanel.setFigure(isMoving);
+							
+							cursor.delFigure();
+							isMoving = null;
+
+	//Max					
+							if (checkMill(tempPanel)) {
+								
+								lastMill = color;
+								mill = true;
+								//6 if black has mill, 5 if white has mill
+								sendOnlineData(color?6:5, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							}
+							else if(lastMill == color) {
+								roundsWithoutMill++;
+							}
+							
+							if(!mill) {
+								sendOnlineData(1, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+							
 						}
-						else {
-							repetition = 0;
-						}
-						
 					}
 				}
-			}
-			
-//Daniel
-			//white
-			if(playerTwoFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
-				if(isMoving != null) {
-					
-					if(!color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-						tempPanel = game.getMouseManager().getPanelPressed();
-						
-						moveToX = game.getMouseManager().getPanelPressedX() + 5;
-						moveToY = game.getMouseManager().getPanelPressedY() + 5;
-						isMoving.move(moveToX, moveToY);	
-						tempPanel.setFigure(isMoving);
-						color = true;
-						
-						cursor.delFigure();
-						isMoving = null;
-
-//Max						
-						if (checkMill(tempPanel)) {
-							color = !color;
-							lastMill = color;
-							mill = true;
-						}
-						else if(lastMill == color) {
-							roundsWithoutMill++;
-						}
-						
-						tempPanel = null;
-						
-						if(checkForRepetition(color)) {
-							repetition++;
-						}
-						else {
-							repetition = 0;
-						}
-					
-					}
-				}
-			}
-			
-//Max
-			//checkForEnd
-			if(color) {
 				
+	//Max
+				//checkForEnd
 				if(checkStalemate()) {
+					sendOnlineData(2, "", "");
 					endState = new EndState(game);
 					State.setCurrentState(endState);
 				}
@@ -336,159 +282,513 @@ public class GraphicsJPanel extends JPanel{
 					endState = new EndState(game, !color);
 					State.setCurrentState(endState);
 				}
-			}
-			else {
 				
-				if(checkStalemate()) {
-					endState = new EndState(game);
-					State.setCurrentState(endState);
+				/*if(color) {
+					
+					
 				}
-				if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
+				else {
+					
+					if(checkStalemate()) {
+						endState = new EndState(game);
+						State.setCurrentState(endState);
+					}
+					if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+					else if(playerTwoFigureCount < 3) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+				}*/
+				
+			}
+			
+	//Daniel
+			//delete Stone
+			/*
+			 * server:
+			 * - send variables to clients
+			 * - receive request of deletion of stone
+			 * - handle request
+			 * - answer with deleted and new variables or
+			 *   can't be deleted
+			 *   
+			 * client:
+			 * - choose stone to be deleted
+			 * - send to server
+			 * - receive answer and renew Variables
+			 *   or choose new stone if the other
+			 *   couldn't be deleted
+			 * 
+			 */
+			else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced())
+			{
+				alreadyPressed = true;
+				if(withoutMill(!color)) {
+					if(!checkMill(game.getMouseManager().getPanelPressed())) {
+						
+						while (!removeFigure(game.getMouseManager().getPanelPressed())) {
+						}
+						mill = false;
+						
+					}
 				}
-				else if(playerTwoFigureCount < 3) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
+				else if(!withoutMill(!color)){
+
+					while (!removeFigure(game.getMouseManager().getPanelPressed())) {
+					}
+					mill = false;
+					
 				}
 			}
 			
+	//Max		
+			//checks for mill while placing phase
+			if(count >= -1 && count <= 17) {
+				if(tempPanel != null) {
+					
+					if(color) {
+						mill = checkMill(tempPanel);
+						if(mill) {
+							roundsWithoutMill = 0;
+							count--;
+							
+							lastMill = color;
+						}
+						else if(lastMill == !color) {
+							roundsWithoutMill++;
+						}
+					}
+					
+					else {
+						mill = checkMill(tempPanel);
+						if(mill) {
+							roundsWithoutMill = 0;
+							count--;
+							
+							lastMill = color;
+						}
+						else if(lastMill == !color) {
+							roundsWithoutMill++;
+						}
+					}
+					
+				}
+				tempPanel = null;
+			}
+			
+			if(count == 17) { 
+				count++;
+			}
+
+			//first field that can be repeated (should be saved in the server and if needed sent to the clients)
+					if(count > 17 && !alreadyAdded) {
+						
+						String s = getStringFromBoard();
+						/*save in server and send to client if needed*/ repetitiveField.add(s);
+						/*handled by server*/ alreadyAdded = true;
+					}
+
+	//Daniel
+			//messages		
+			String msg = "";
+					
+			if(!color) {
+				
+				if(activeUser) {
+					msg += "White (YOU): ";
+				} else {
+					
+					msg += "Black (NMY): ";
+				}
+				
+			} else {
+				
+				if(activeUser) {
+					msg += "Black (YOU): ";
+				} else {
+					
+					msg += "White (NMY): ";
+				}
+				
+			}
+			
+			if(mill) {
+				msg += "mill";
+			} else {
+				
+				if(count < 17) {
+					msg += "place a stone";
+				} else {
+					msg += "choose a stone";
+				}
+				
+			}
+			
+			
+			
+			game.getWindow().getLabel().setText(msg);
+			
 		}
 		
-//Daniel
-		//delete Stone
+		else //TODO SPLIT
 		
-		else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced())
 		{
-			alreadyPressed = true;
-			if(withoutMill(!color)) {
-				if(!checkMill(game.getMouseManager().getPanelPressed())) {
+		
+			if(!game.getMouseManager().isLeftPressed()) {
+				alreadyPressed = false;
+			}
+			
+			if(!mill) {
+				//PlacingPhase
+			
+				
+				if(!alreadyPressed) {
 					
+					if(count < 17 && game.getMouseManager().isLeftPressed() && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						tempPanel = game.getMouseManager().getPanelPressed();		//
+						moveToX = game.getMouseManager().getPanelPressedX() + 5;	//	Transfer
+						moveToY = game.getMouseManager().getPanelPressedY() + 5;	//
+						count++;													//
+						//Black
+						if (color) {
+							tempPanel.setFigure(playerOne[count / 2]);
+							if (!mill) {
+								playerOne[count / 2].move(moveToX, moveToY);
+							}
+							
+							color = !color;
+						}
+						//White
+						else {
+							tempPanel.setFigure(playerTwo[count / 2]);
+							if (!mill) {
+								playerTwo[count / 2].move(moveToX, moveToY);
+							}
+							
+							color = !color;
+						}
+					
+						alreadyPressed = true;
+					}
+					
+				}
+			
+				//choose moving Piece
+				if(!alreadyPressed) {
+					
+					if(count >= 17 && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						alreadyPressed = true;
+						
+						//black
+						if (color && game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
+							isMoving = game.getMouseManager().getPanelPressed().getFigure();
+							cursor = game.getMouseManager().getPanelPressed();
+						}
+					
+						//white
+						if(!color && !game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
+							isMoving = game.getMouseManager().getPanelPressed().getFigure();
+							cursor = game.getMouseManager().getPanelPressed();
+						}
+					}
+				}
+				
+				//MovePhase
+				if(isMoving != null) {
+					//black
+					if(playerOneFigureCount > 3 && color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						tempPanel = game.getMouseManager().getPanelPressed();
+					
+						if(tempPanel.isNeighborFrom(cursor)) {
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+							isMoving.move(moveToX, moveToY);
+							tempPanel.setFigure(isMoving);
+							
+							color = false;
+							
+							cursor.delFigure();
+							isMoving = null;
+							
+	//Max
+							if(checkMill(tempPanel)) {
+								color = !color;
+								roundsWithoutMill = 0;
+								lastMill = color;
+								mill = true;
+							}
+							else if(lastMill == color) {
+								roundsWithoutMill++;
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+					
+						}
+					}
+				
+	//Daniel			
+					//white
+					if(playerTwoFigureCount > 3 && !color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+						tempPanel = game.getMouseManager().getPanelPressed();
+					
+						if (tempPanel.isNeighborFrom(cursor) || cursor.isNeighborFrom(tempPanel)) {
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+							isMoving.move(moveToX, moveToY);
+							tempPanel.setFigure(isMoving);
+							
+							color = true;
+							
+							cursor.delFigure();
+							isMoving = null;
+							
+	//Max
+							if(checkMill(tempPanel)) {
+								color = !color;
+								roundsWithoutMill = 0;
+								lastMill = color;
+								mill = true;
+							}
+							else if(lastMill == color) {
+								roundsWithoutMill++;
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+						}
+					}
+				}
+	
+	//Daniel
+				//JumpPhase
+			
+				//black
+				if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
+					if(isMoving != null) {
+					
+						if(color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+							tempPanel = game.getMouseManager().getPanelPressed();
+						
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+							isMoving.move(moveToX, moveToY);
+							tempPanel.setFigure(isMoving);
+							color = false;
+							
+							cursor.delFigure();
+							isMoving = null;
+	
+	//Max						
+							if (checkMill(tempPanel)) {
+								color = !color;
+								lastMill = color;
+								mill = true;
+							}
+							else if(lastMill == color) {
+								roundsWithoutMill++;
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+							
+						}
+					}
+				}
+				
+	//Daniel
+				//white
+				if(playerTwoFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
+					if(isMoving != null) {
+						
+						if(!color && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+							tempPanel = game.getMouseManager().getPanelPressed();
+							
+							moveToX = game.getMouseManager().getPanelPressedX() + 5;
+							moveToY = game.getMouseManager().getPanelPressedY() + 5;
+							isMoving.move(moveToX, moveToY);	
+							tempPanel.setFigure(isMoving);
+							color = true;
+							
+							cursor.delFigure();
+							isMoving = null;
+	
+	//Max						
+							if (checkMill(tempPanel)) {
+								color = !color;
+								lastMill = color;
+								mill = true;
+							}
+							else if(lastMill == color) {
+								roundsWithoutMill++;
+							}
+							
+							tempPanel = null;
+							
+							if(checkForRepetition(color)) {
+								repetition++;
+							}
+							else {
+								repetition = 0;
+							}
+						
+						}
+					}
+				}
+				
+	//Max
+				//checkForEnd
+				if(color) {
+					
+					if(checkStalemate()) {
+						endState = new EndState(game);
+						State.setCurrentState(endState);
+					}
+					if(playerOneFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+					else if(playerOneFigureCount < 3) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+				}
+				else {
+					
+					if(checkStalemate()) {
+						endState = new EndState(game);
+						State.setCurrentState(endState);
+					}
+					if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+					else if(playerTwoFigureCount < 3) {
+						endState = new EndState(game, !color);
+						State.setCurrentState(endState);
+					}
+				}
+				
+			}
+			
+	//Daniel
+			//delete Stone
+			
+			else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced())
+			{
+				alreadyPressed = true;
+				if(withoutMill(!color)) {
+					if(!checkMill(game.getMouseManager().getPanelPressed())) {
+						
+						while (!removeFigure(game.getMouseManager().getPanelPressed())) {
+						}
+						mill = false;
+						color = !color;
+					}
+				}
+				else if(!withoutMill(!color)){
+	
 					while (!removeFigure(game.getMouseManager().getPanelPressed())) {
 					}
 					mill = false;
 					color = !color;
 				}
 			}
-			else if(!withoutMill(!color)){
-
-				while (!removeFigure(game.getMouseManager().getPanelPressed())) {
-				}
-				mill = false;
-				color = !color;
-			}
-		}
-		
-//Max		
-		//checks for mill while placing phase
-		if(count >= -1 && count <= 17) {
-			if(tempPanel != null) {
-				
-				if(color) {
-					mill = checkMill(tempPanel);
-					if(mill) {
-						roundsWithoutMill = 0;
-						count--;
-						color = !color;
-						lastMill = color;
-					}
-					else if(lastMill == !color) {
-						roundsWithoutMill++;
-					}
-				}
-				
-				else {
-					mill = checkMill(tempPanel);
-					if(mill) {
-						roundsWithoutMill = 0;
-						count--;
-						color = !color;
-						lastMill = color;
-					}
-					else if(lastMill == !color) {
-						roundsWithoutMill++;
-					}
-				}
-				
-			}
-			tempPanel = null;
-		}
-		
-		if(count == 17) { 
-			count++;
-		}
-
-		//first field that can be repeated
-				if(count > 17 && !alreadyAdded) {
-					MyJPanel[][] f = game.getWindow().getJPanel();
-					String s = "";
+			
+	//Max		
+			//checks for mill while placing phase
+			if(count >= -1 && count <= 17) {
+				if(tempPanel != null) {
 					
-					for (int i = 0; i < f.length; i++) {
-						for (int j = 0; j < f[i].length; j++) {
-							if (f[i][j].isFigurePlaced()) {
-								if (f[i][j].getFigure().getColor()) {
-									
-									s += "2";
-									
+					if(color) {
+						mill = checkMill(tempPanel);
+						if(mill) {
+							roundsWithoutMill = 0;
+							count--;
+							color = !color;
+							lastMill = color;
+						}
+						else if(lastMill == !color) {
+							roundsWithoutMill++;
+						}
+					}
+					
+					else {
+						mill = checkMill(tempPanel);
+						if(mill) {
+							roundsWithoutMill = 0;
+							count--;
+							color = !color;
+							lastMill = color;
+						}
+						else if(lastMill == !color) {
+							roundsWithoutMill++;
+						}
+					}
+					
+				}
+				tempPanel = null;
+			}
+			
+			if(count == 17) { 
+				count++;
+			}
+	
+			//first field that can be repeated
+					if(count > 17 && !alreadyAdded) {
+						MyJPanel[][] f = game.getWindow().getJPanel();
+						String s = "";
+						
+						for (int i = 0; i < f.length; i++) {
+							for (int j = 0; j < f[i].length; j++) {
+								if (f[i][j].isFigurePlaced()) {
+									if (f[i][j].getFigure().getColor()) {
+										
+										s += "2";
+										
+									}
+									else {
+										
+										s += "1";
+										
+									}
 								}
 								else {
 									
-									s += "1";
+									s += "0";
 									
 								}
 							}
-							else {
-								
-								s += "0";
-								
-							}
 						}
+						repetitiveField.add(s);
+						alreadyAdded = true;
 					}
-					repetitiveField.add(s);
-					alreadyAdded = true;
-				}
-
-//Daniel
-		//messages		
-
-		if(count < 17) {
-			if(color) {
-				if(!mill) {
-					game.getWindow().getLabel().setText("Black: place a stone");
-				}
-				else {
-					game.getWindow().getLabel().setText("Black: mill");
-				}
-			}
-			else {
-				if(!mill) {
-					game.getWindow().getLabel().setText("White: place a stone");
-				}
-				else {
-					game.getWindow().getLabel().setText("White: mill");
-				}
-			}
-		}
-		if(count > 17) {
-			if(isMoving == null) {
-				if(color) {
-					if(!mill) {
-						game.getWindow().getLabel().setText("Black: choose a stone");
-					}
-					else {
-						game.getWindow().getLabel().setText("Black: mill");
-					}
-				}
-				else{
-					if(!mill) {
-						game.getWindow().getLabel().setText("White: choose a stone");
-					}
-					else {
-						game.getWindow().getLabel().setText("White: mill");
-					}
-				}
-			}
-			else {
+	
+	//Daniel
+			//messages		
+	
+			if(count < 17) {
 				if(color) {
 					if(!mill) {
 						game.getWindow().getLabel().setText("Black: place a stone");
@@ -497,7 +797,7 @@ public class GraphicsJPanel extends JPanel{
 						game.getWindow().getLabel().setText("Black: mill");
 					}
 				}
-				else{
+				else {
 					if(!mill) {
 						game.getWindow().getLabel().setText("White: place a stone");
 					}
@@ -506,11 +806,181 @@ public class GraphicsJPanel extends JPanel{
 					}
 				}
 			}
+			if(count > 17) {
+				if(isMoving == null) {
+					if(color) {
+						if(!mill) {
+							game.getWindow().getLabel().setText("Black: choose a stone");
+						}
+						else {
+							game.getWindow().getLabel().setText("Black: mill");
+						}
+					}
+					else{
+						if(!mill) {
+							game.getWindow().getLabel().setText("White: choose a stone");
+						}
+						else {
+							game.getWindow().getLabel().setText("White: mill");
+						}
+					}
+				}
+				else {
+					if(color) {
+						if(!mill) {
+							game.getWindow().getLabel().setText("Black: place a stone");
+						}
+						else {
+							game.getWindow().getLabel().setText("Black: mill");
+						}
+					}
+					else{
+						if(!mill) {
+							game.getWindow().getLabel().setText("White: place a stone");
+						}
+						else {
+							game.getWindow().getLabel().setText("White: mill");
+						}
+					}
+				}
+			}
+		
 		}
+		
 		this.repaint();
 		
 	}
 	
+	private void sendOnlineData(int status, String fromCoords, String toCoords) {
+		
+		String s = fromCoords + "_" + toCoords;
+		System.out.println(s);
+		oMan.sendData(new DataPackage(status, s));
+		activeUser = false;
+		
+	}
+	
+	private void getOnlineData() {
+		
+		DataPackage dp = oMan.receiveData();
+		
+		if(dp == null) {
+			
+			return;
+			
+		}
+		
+		if(dp.getStatus() <= 1) {
+			
+			if(dp.getStatus() == 0) {
+				//Placing Phase
+				count++;
+				
+			}
+			
+			//TODO
+			//Spielstatus anpassen
+			drawBoardFromString(dp.getMove());
+			activeUser = true;
+			
+		} else if(dp.getStatus() <= 4) {
+
+			if(dp.getStatus() == 2) {
+				//Stalemate / Draw
+				endState = new EndState(game);
+				State.setCurrentState(endState);
+				
+			} else if(dp.getStatus() == 3) {
+				//White wins
+				endState = new EndState(game, false);
+				State.setCurrentState(endState);
+				
+			} else if(dp.getStatus() == 4) {
+				//Black wins
+				endState = new EndState(game, true);
+				State.setCurrentState(endState);
+				
+			}
+			
+			//TODO
+			//End Game Accordingly
+			endID = dp.getStatus();
+			activeUser = false;
+			
+		} else if(dp.getStatus() <= 6) {
+			
+			//TODO
+			//Mills
+			drawBoardFromString(dp.getMove());
+			roundsWithoutMill = 0;
+			lastMill = !color;
+			
+			activeUser = false;
+			
+		} else if(dp.getStatus() == 99) {
+			
+			boolean thisColor = Integer.parseInt(dp.getMove())%10 == 1;
+			reset(thisColor);
+			
+		}
+		
+	}
+	
+	private String getStringFromBoard() {
+
+		MyJPanel[][] f = game.getWindow().getJPanel();
+		String s = "";
+		
+		for (int i = 0; i < f.length; i++) {
+			for (int j = 0; j < f[i].length; j++) {
+				if (f[i][j].isFigurePlaced()) {
+					if (f[i][j].getFigure().getColor()) {
+						
+						s += "2";
+						
+					}
+					else {
+						
+						s += "1";
+						
+					}
+				}
+				else {
+					
+					s += "0";
+					
+				}
+			}
+		}
+		
+		return s;
+		
+	}
+	
+	private void drawBoardFromString(String move) {
+		
+		MyJPanel[][] f = game.getWindow().getJPanel();
+		String[] data = move.split("_");
+		
+		String[] from = data[0].split("");
+		String[] to = data[1].split("");
+		
+		
+		
+		if(data[1].equals("99")) {
+			
+			playerOneFigureCount--;
+			f[Integer.parseInt(from[0])][Integer.parseInt(from[1])].delFigure();
+			
+		} else {
+			
+			f[Integer.parseInt(from[0])][Integer.parseInt(from[1])].getFigure().move(Integer.parseInt(to[0]), Integer.parseInt(to[1]));
+			
+		}
+		
+		
+	}
+
 	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -590,11 +1060,48 @@ public class GraphicsJPanel extends JPanel{
 		else if(State.getCurrentState() instanceof EndState) {
 			game.getWindow().setRunning(false);
 			EndState tempState = (EndState) endState;
-			if(tempState.getColor() != null && tempState.getColor()) {
-				game.getWindow().getLabel().setText("Black wins!");
-			}
-			else {
-				game.getWindow().getLabel().setText("White wins!");
+			if(online) {
+				
+				if(tempState.getColor() != null && tempState.getColor() || endID == 4) {
+					if(color) {
+							
+						game.getWindow().getLabel().setText("Black (YOU) wins!");
+							
+					} else {
+
+						game.getWindow().getLabel().setText("Black (NMY) wins!");
+							
+					}
+					
+					if(endID != 4) {
+						
+						sendOnlineData(4, "", "");
+						
+					}
+					
+				} else if(endID == 3) {
+					
+					if(!color) {
+						
+						game.getWindow().getLabel().setText("White (YOU) wins!");
+						
+					} else {
+
+						game.getWindow().getLabel().setText("White (NMY) wins!");
+						
+					}
+					
+				}
+				
+			} else {
+				
+				if(tempState.getColor() != null && tempState.getColor()) {
+					game.getWindow().getLabel().setText("Black wins!");
+				}
+				else {
+					game.getWindow().getLabel().setText("White wins!");
+				}
+				
 			}
 		}
 		
@@ -638,7 +1145,7 @@ public class GraphicsJPanel extends JPanel{
 	
 	//resets the graphics to play a new game
 	
-	public void reset() {
+	public void reset(boolean color) {
 		this.repetition = 0;
 		this.repetitiveField = new ArrayList<String>();
 		this.roundsWithoutMill = 0;
@@ -647,7 +1154,7 @@ public class GraphicsJPanel extends JPanel{
 		this.count = -1;
 		
 		this.mill = false;
-		this.color = random.nextBoolean();
+		this.color = color;
 		this.lastMill = false;
 		this.alreadyPressed = false;
 		
@@ -732,16 +1239,17 @@ public class GraphicsJPanel extends JPanel{
 	
 	private boolean checkStalemate() {
 		
-		if(this.roundsWithoutMill == 20) {
-			
+		if(this.roundsWithoutMill == 20)
 			return true;
-			
-		}
-		if(this.repetition == 3) {
-			
+		
+		if(this.repetition == 3)
 			return true;
-			
-		}
+		
+		if(stalemateOnline)
+			return true;
+		
+		if(endID == 2)
+			return true;
 		
 		return false;
 		
@@ -814,6 +1322,14 @@ public class GraphicsJPanel extends JPanel{
 	
 	public Figure [] getPlayerTwo() {
 		return this.playerTwo;
+	}
+	
+	public void setOnline(boolean isOnline) {
+		this.online = isOnline;
+	}
+	
+	public void setOnlineManager(OnlineManager onlineManager) {
+		this.oMan = onlineManager;
 	}
 	
 }
