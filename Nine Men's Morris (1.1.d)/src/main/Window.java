@@ -1,4 +1,4 @@
-package mypackages.ninemensmorris;
+package main;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,12 +15,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import mypackages.ninemensmorris.game.Game;
-import mypackages.ninemensmorris.graphics.GraphicsJPanel;
-import mypackages.ninemensmorris.graphics.GraphicsLoader;
-import mypackages.ninemensmorris.graphics.MyJPanel;
-import mypackages.ninemensmorris.networking.OnlineManager;
-import mypackages.ninemensmorris.states.State;
+import main.game.Game;
+import main.graphics.GraphicsJPanel;
+import main.graphics.GraphicsLoader;
+import main.graphics.MyJPanel;
+import main.online.OnlineManager;
+import main.states.State;
 
 public class Window extends JFrame{
 	

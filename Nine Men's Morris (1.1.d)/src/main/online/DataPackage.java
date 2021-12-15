@@ -1,4 +1,4 @@
-package mypackages.ninemensmorris.networking;
+package main.online;
 
 import java.io.Serializable;
 

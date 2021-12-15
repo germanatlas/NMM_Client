@@ -1,10 +1,10 @@
-package mypackages.ninemensmorris.input;
+package main.input;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-import mypackages.ninemensmorris.graphics.MyJPanel;
+import main.graphics.MyJPanel;
 
 public class MouseManager implements MouseListener, MouseMotionListener{
 	

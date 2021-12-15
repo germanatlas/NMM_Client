@@ -1,4 +1,4 @@
-package mypackages.ninemensmorris.graphics;
+package main.graphics;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,14 +10,14 @@ import java.util.Random;
 
 import javax.swing.JPanel;
 
-import mypackages.ninemensmorris.game.Game;
-import mypackages.ninemensmorris.movment.Figure;
-import mypackages.ninemensmorris.networking.DataPackage;
-import mypackages.ninemensmorris.networking.OnlineManager;
-import mypackages.ninemensmorris.states.EndState;
-import mypackages.ninemensmorris.states.GameState;
-import mypackages.ninemensmorris.states.MenuState;
-import mypackages.ninemensmorris.states.State;
+import main.game.Game;
+import main.movment.Figure;
+import main.online.DataPackage;
+import main.online.OnlineManager;
+import main.states.EndState;
+import main.states.GameState;
+import main.states.MenuState;
+import main.states.State;
 
 public class GraphicsJPanel extends JPanel{
 

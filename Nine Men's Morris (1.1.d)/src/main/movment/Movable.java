@@ -1,4 +1,4 @@
-package mypackages.ninemensmorris.movment;
+package main.movment;
 
 import java.awt.Graphics;
 

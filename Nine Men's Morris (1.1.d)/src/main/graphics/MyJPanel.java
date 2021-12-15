@@ -1,10 +1,10 @@
-package mypackages.ninemensmorris.graphics;
+package main.graphics;
 
 import java.util.ArrayList;
 
 import javax.swing.JPanel;
 
-import mypackages.ninemensmorris.movment.Figure;
+import main.movment.Figure;
 
 public class MyJPanel extends JPanel{
 

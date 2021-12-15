@@ -1,15 +1,15 @@
-package mypackages.ninemensmorris.game;
+package main.game;
 
 import java.awt.Graphics;
 import java.util.Random;
 
-import mypackages.ninemensmorris.Window;
-import mypackages.ninemensmorris.input.KeyboardManager;
-import mypackages.ninemensmorris.input.MouseManager;
-import mypackages.ninemensmorris.states.GameState;
-import mypackages.ninemensmorris.states.MenuState;
-import mypackages.ninemensmorris.states.OptionsState;
-import mypackages.ninemensmorris.states.State;
+import main.Window;
+import main.input.KeyboardManager;
+import main.input.MouseManager;
+import main.states.GameState;
+import main.states.MenuState;
+import main.states.OptionsState;
+import main.states.State;
 
 public class Game implements Runnable{
 	

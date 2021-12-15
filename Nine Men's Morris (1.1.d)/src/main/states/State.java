@@ -1,8 +1,8 @@
-package mypackages.ninemensmorris.states;
+package main.states;
 
 import java.awt.Graphics;
 
-import mypackages.ninemensmorris.game.Game;
+import main.game.Game;
 
 public abstract class State {
 	

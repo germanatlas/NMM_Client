@@ -1,4 +1,4 @@
-package mypackages.ninemensmorris.states;
+package main.states;
 
 import java.awt.Graphics;
 
@@ -6,7 +6,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import mypackages.ninemensmorris.game.Game;
+import main.game.Game;
 
 public class OptionsState extends State {
 

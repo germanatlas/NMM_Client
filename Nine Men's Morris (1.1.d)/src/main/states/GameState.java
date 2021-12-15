@@ -1,12 +1,12 @@
-package mypackages.ninemensmorris.states;
+package main.states;
 
 import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
-import mypackages.ninemensmorris.game.Game;
-import mypackages.ninemensmorris.graphics.GraphicsJPanel;
+import main.game.Game;
+import main.graphics.GraphicsJPanel;
 
 public class GameState extends State{
 	

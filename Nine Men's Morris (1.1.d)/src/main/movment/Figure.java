@@ -1,10 +1,10 @@
-package mypackages.ninemensmorris.movment;
+package main.movment;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import mypackages.ninemensmorris.graphics.GraphicsJPanel;
-import mypackages.ninemensmorris.graphics.GraphicsLoader;
+import main.graphics.GraphicsJPanel;
+import main.graphics.GraphicsLoader;
 
 public class Figure extends Movable{
 

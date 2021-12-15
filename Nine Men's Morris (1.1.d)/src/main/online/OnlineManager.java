@@ -1,8 +1,8 @@
-package mypackages.ninemensmorris.networking;
+package main.online;
 
 import java.io.IOException;
 
-import mypackages.ninemensmorris.game.Game;
+import main.game.Game;
 
 public class OnlineManager {
 	

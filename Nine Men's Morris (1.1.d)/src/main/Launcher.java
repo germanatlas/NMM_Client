@@ -1,6 +1,6 @@
-package mypackages.ninemensmorris;
+package main;
 
-import mypackages.ninemensmorris.game.Game;
+import main.game.Game;
 
 //starts the game thread
 
