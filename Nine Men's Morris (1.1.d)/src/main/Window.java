@@ -280,6 +280,9 @@ public class Window extends JFrame{
 				if(e.getSource() == startButton) {
 					setRunning(true);
 					isOnline = false;
+					if(oMan.getIfActive()) {
+						oMan.endConnection();
+					}
 					panel.setOnline(isOnline);
 					game.reset(isOnline);
 				}
@@ -287,22 +290,29 @@ public class Window extends JFrame{
 					State.setCurrentState(game.getGameState());
 				}
 				if(e.getSource() == closeButton) {
+					if(oMan.getIfActive()) {
+						oMan.endConnection();
+					}
 					System.exit(0);
 				}
 				if(e.getSource() == joinButton) {
 					//TODO
 					//Create Game
-					
-					oMan = new OnlineManager(game);
-					if(oMan.getIfActive()) {
+					if(!isOnline) {
+						
+						oMan = new OnlineManager(game);
+						if(oMan.getIfActive()) {
 
-						setRunning(true);
-						isOnline = true;
-						panel.setOnline(isOnline);
-						panel.setOnlineManager(oMan);
-						game.reset(isOnline);
+							setRunning(true);
+							isOnline = true;
+							panel.setOnline(isOnline);
+							panel.setOnlineManager(oMan);
+							game.reset(isOnline);
+							
+						}
 						
 					}
+					
 				}
 				if(e.getSource() == optionButton) {
 					//TODO
