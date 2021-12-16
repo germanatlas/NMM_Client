@@ -65,7 +65,7 @@ public class GraphicsJPanel extends JPanel{
 	private MyJPanel cursor, 
 					 tempPanel;
 	
-	public GraphicsJPanel(Game game, int WIDTH, int HEIGHT, OnlineManager oMan) {
+	public GraphicsJPanel(Game game, int WIDTH, int HEIGHT) {
 		
 		this.game = game;
 		
@@ -92,13 +92,12 @@ public class GraphicsJPanel extends JPanel{
 		this.cursor = null;
 		this.tempPanel = null;
 		
-		this.oMan = oMan;
 		this.playerOne = new Figure[9];
 		this.playerTwo = new Figure[9];
 		
 		for(int i = 0; i < 9; i++) {
-			playerOne[i] = new Figure(true, this, 140, 50 + i * 70);
-			playerTwo[i] = new Figure(false, this, 820, 50 + i * 70);
+			playerOne[i] = new Figure(color, this, 140, 50 + i * 70);
+			playerTwo[i] = new Figure(!color, this, 820, 50 + i * 70);
 		}
 		
 	}
@@ -141,7 +140,7 @@ public class GraphicsJPanel extends JPanel{
 								playerOne[count / 2].move(moveToX, moveToY);
 							}
 
-							sendOnlineData(0, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							sendOnlineData(0, "", moveToX + "-" + moveToY);
 							
 						}
 						alreadyPressed = true;
@@ -230,7 +229,7 @@ public class GraphicsJPanel extends JPanel{
 							moveToX = game.getMouseManager().getPanelPressedX() + 5;
 							moveToY = game.getMouseManager().getPanelPressedY() + 5;
 
-							sendOnlineData(1, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+							sendOnlineData(1, isMoving.getX() + "-" + isMoving.getY(), moveToX + "-" + moveToY);
 							isMoving.move(moveToX, moveToY);
 							tempPanel.setFigure(isMoving);
 							
@@ -243,14 +242,14 @@ public class GraphicsJPanel extends JPanel{
 								lastMill = color;
 								mill = true;
 								//6 if black has mill, 5 if white has mill
-								sendOnlineData(color?6:5, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+								sendOnlineData(color?6:5, isMoving.getX() + "-" + isMoving.getY(), moveToX + "-" + moveToY);
 							}
 							else if(lastMill == color) {
 								roundsWithoutMill++;
 							}
 							
 							if(!mill) {
-								sendOnlineData(1, isMoving.getX() + "" + isMoving.getY(), moveToX + "" + moveToY);
+								sendOnlineData(1, isMoving.getX() + "-" + isMoving.getY(), moveToX + "-" + moveToY);
 							}
 							
 							tempPanel = null;
@@ -283,46 +282,8 @@ public class GraphicsJPanel extends JPanel{
 					State.setCurrentState(endState);
 				}
 				
-				/*if(color) {
-					
-					
-				}
-				else {
-					
-					if(checkStalemate()) {
-						endState = new EndState(game);
-						State.setCurrentState(endState);
-					}
-					if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
-						endState = new EndState(game, !color);
-						State.setCurrentState(endState);
-					}
-					else if(playerTwoFigureCount < 3) {
-						endState = new EndState(game, !color);
-						State.setCurrentState(endState);
-					}
-				}*/
-				
 			}
 			
-	//Daniel
-			//delete Stone
-			/*
-			 * server:
-			 * - send variables to clients
-			 * - receive request of deletion of stone
-			 * - handle request
-			 * - answer with deleted and new variables or
-			 *   can't be deleted
-			 *   
-			 * client:
-			 * - choose stone to be deleted
-			 * - send to server
-			 * - receive answer and renew Variables
-			 *   or choose new stone if the other
-			 *   couldn't be deleted
-			 * 
-			 */
 			else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced())
 			{
 				alreadyPressed = true;
@@ -856,7 +817,7 @@ public class GraphicsJPanel extends JPanel{
 		String s = fromCoords + "_" + toCoords;
 		System.out.println(s);
 		oMan.sendData(new DataPackage(status, s));
-		activeUser = false;
+		if(!mill) activeUser = false;
 		
 	}
 	
@@ -918,7 +879,7 @@ public class GraphicsJPanel extends JPanel{
 			activeUser = false;
 			
 		} else if(dp.getStatus() == 99) {
-			
+			activeUser = Integer.parseInt(dp.getMove())/10 == 1;
 			boolean thisColor = Integer.parseInt(dp.getMove())%10 == 1;
 			reset(thisColor);
 			
@@ -962,8 +923,8 @@ public class GraphicsJPanel extends JPanel{
 		MyJPanel[][] f = game.getWindow().getJPanel();
 		String[] data = move.split("_");
 		
-		String[] from = data[0].split("");
-		String[] to = data[1].split("");
+		String[] from = data[0].split("-");
+		String[] to = data[1].split("-");
 		
 		
 		
@@ -971,6 +932,10 @@ public class GraphicsJPanel extends JPanel{
 			
 			playerOneFigureCount--;
 			f[Integer.parseInt(from[0])][Integer.parseInt(from[1])].delFigure();
+			
+		} else if(data[0].equals("")) {
+			
+			playerTwo[count / 2].move(Integer.parseInt(to[0]), Integer.parseInt(to[1]));
 			
 		} else {
 			
@@ -1166,8 +1131,8 @@ public class GraphicsJPanel extends JPanel{
 		this.playerTwo = new Figure[9];
 		
 		for(int i = 0; i < 9; i++) {
-			playerOne[i] = new Figure(true, this, 140, 50 + i * 70);
-			playerTwo[i] = new Figure(false, this, 820, 50 + i * 70);
+			playerOne[i] = new Figure(this.color, this, 140, 50 + i * 70);
+			playerTwo[i] = new Figure(!this.color, this, 820, 50 + i * 70);
 		}
 		
 	}

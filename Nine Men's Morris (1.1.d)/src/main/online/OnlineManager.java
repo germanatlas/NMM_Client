@@ -32,7 +32,6 @@ public class OnlineManager {
 						while(client.getIfActive());
 						client.stopClient();
 						activeClient = false;
-						game.getWindow().setIfClientActive(activeClient);
 						System.out.println("Connection to Server ended."); //TODO
 						break connectionloop;
 						
@@ -50,7 +49,7 @@ public class OnlineManager {
 	
 	public void sendData(DataPackage data) {
 		
-		if(activeClient || game.getWindow().getIfClientActive()) {
+		if(activeClient) {
 			
 			client.sendData(data);
 		
@@ -60,7 +59,7 @@ public class OnlineManager {
 	
 	public DataPackage receiveData() {
 		
-		if(activeClient || game.getWindow().getIfClientActive()) {
+		if(activeClient) {
 			
 			return (DataPackage) client.receiveData();
 			
@@ -79,7 +78,6 @@ public class OnlineManager {
 			try {
 				client = new Client(address, port);
 				activeClient = true;
-				game.getWindow().setIfClientActive(activeClient);
 				System.out.println("Connected Client.");
 			} catch (IOException e) {
 				System.out.println("Client Start Error:\n" + e);

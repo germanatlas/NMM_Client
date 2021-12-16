@@ -82,12 +82,11 @@ public class Window extends JFrame{
 		running = false;
 		
 		inetAddress = "";
-		oMan = new OnlineManager(game);
 		activeClient = false;
 		
 		frame = new JFrame(TITLE);
 		
-		panel = new GraphicsJPanel(game, WIDTH, HEIGHT, oMan);
+		panel = new GraphicsJPanel(game, WIDTH, HEIGHT);
 		jPanel = new MyJPanel[7][7];
 		messagePanel = new JPanel();
 		
@@ -103,7 +102,7 @@ public class Window extends JFrame{
 		frame.setSize(WIDTH, HEIGHT);
 		frame.addKeyListener(game.getKeyboardManager());
 		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(saveClose());
 		frame.setLocationRelativeTo(null);
 		frame.setFocusable(false);
 		frame.setLayout(new GridBagLayout());
@@ -410,6 +409,17 @@ public class Window extends JFrame{
 		frame.pack();
 	}
 	
+	private int saveClose() {
+		
+		if(isOnline) {
+			
+			oMan.endConnection();
+			
+		}
+		
+		return 3;
+	}
+
 	public void tick() {
 		
 		if(running) {
