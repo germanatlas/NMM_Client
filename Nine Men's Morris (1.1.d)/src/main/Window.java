@@ -44,7 +44,9 @@ public class Window extends JFrame{
 	private OnlineManager oMan;
 	
 	private boolean running,
-					activeClient;
+					activeClient,
+					isOnline,
+					wasOnline;
 	
 	private Font chalk;
 	private final Color GREENISH = new Color(53, 104, 45);
@@ -58,8 +60,6 @@ public class Window extends JFrame{
 	private final GridBagConstraints STANDARDCONSTRAINTS = new GridBagConstraints();
 
 	private String inetAddress;
-
-	private boolean isOnline;
 
 //Daniel	
 	public Window(Game game) {
@@ -280,9 +280,8 @@ public class Window extends JFrame{
 				if(e.getSource() == startButton) {
 					setRunning(true);
 					isOnline = false;
-					if(oMan.getIfActive()) {
+					if(wasOnline)
 						oMan.endConnection();
-					}
 					panel.setOnline(isOnline);
 					game.reset(isOnline);
 				}
@@ -290,7 +289,7 @@ public class Window extends JFrame{
 					State.setCurrentState(game.getGameState());
 				}
 				if(e.getSource() == closeButton) {
-					if(oMan.getIfActive()) {
+					if(wasOnline) {
 						oMan.endConnection();
 					}
 					System.exit(0);
@@ -305,6 +304,7 @@ public class Window extends JFrame{
 
 							setRunning(true);
 							isOnline = true;
+							wasOnline = true;
 							panel.setOnline(isOnline);
 							panel.setOnlineManager(oMan);
 							game.reset(isOnline);
