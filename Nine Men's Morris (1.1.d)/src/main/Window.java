@@ -19,6 +19,7 @@ import main.game.Game;
 import main.graphics.GraphicsJPanel;
 import main.graphics.GraphicsLoader;
 import main.graphics.MyJPanel;
+import main.online.DataPackage;
 import main.online.OnlineManager;
 import main.states.State;
 
@@ -271,6 +272,8 @@ public class Window extends JFrame{
 		label.setBounds(5, 10, 310, 50);
 		label.setForeground(Color.white);
 		label.setFont(chalk.deriveFont(22f));
+		label.setText(TITLE);
+		label.setVisible(true);
 		
 		ActionListener buttonManager = new ActionListener() {
 
@@ -283,7 +286,7 @@ public class Window extends JFrame{
 					if(wasOnline)
 						oMan.endConnection();
 					panel.setOnline(isOnline);
-					game.reset(isOnline);
+					game.reset(isOnline, true);
 				}
 				if(e.getSource() == continueButton) {
 					State.setCurrentState(game.getGameState());
@@ -295,19 +298,28 @@ public class Window extends JFrame{
 					System.exit(0);
 				}
 				if(e.getSource() == joinButton) {
-					//TODO
-					//Create Game
+					
 					if(!isOnline) {
 						
 						oMan = new OnlineManager(game);
 						if(oMan.getIfActive()) {
 
-							setRunning(true);
-							isOnline = true;
-							wasOnline = true;
-							panel.setOnline(isOnline);
-							panel.setOnlineManager(oMan);
-							game.reset(isOnline);
+							DataPackage dp = oMan.receiveData();
+							System.out.println(dp.getStatus() + " " + dp.getMove());
+							
+							if(dp.getStatus() == 99) {
+								
+								setRunning(true);
+								isOnline = true;
+								wasOnline = true;
+								panel.setOnlineManager(oMan);
+								panel.setOnline(isOnline);
+
+								panel.setActiveUser(Integer.parseInt(dp.getMove())/10 == 1);
+								//Starts a new game, online and which color the local player has
+								game.reset(isOnline, Integer.parseInt(dp.getMove())%10 == 1);
+								
+							}
 							
 						}
 						
@@ -318,7 +330,10 @@ public class Window extends JFrame{
 					//TODO
 					//Open Options
 					State.setCurrentState(game.getOptionsState());
-						//Username?
+						//TODO
+							//IP
+						//Later
+							//Username
 				}
 				if(e.getSource() == exitButton) {
 					//TODO
@@ -420,13 +435,9 @@ public class Window extends JFrame{
 	}
 	
 	private int saveClose() {
-		
 		if(isOnline) {
-			
 			oMan.endConnection();
-			
 		}
-		
 		return 3;
 	}
 

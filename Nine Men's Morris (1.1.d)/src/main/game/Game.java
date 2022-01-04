@@ -118,24 +118,43 @@ public class Game implements Runnable{
 	}
 	
 	//resets the game to play a new Game
-	public void reset(boolean isOnline) {
+	public void reset(boolean isOnline, boolean color) {
 		
-		
+		if(isOnline) {
 			
-		for (int i = 0; i < 7; i++) {
-			for(int j = 0; j < 7; j++) {
-				window.getJPanel()[i][j].delFigure();
+			for (int i = 0; i < 7; i++) {
+				for(int j = 0; j < 7; j++) {
+					window.getJPanel()[i][j].delFigure();
+				}
 			}
-		}
+				
+			for (int i = 0; i < 9; i++) {
+				window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
+				window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+			}
+				
+			window.getPanel().reset(color);
 			
-		for (int i = 0; i < 9; i++) {
-			window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
-			window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
-		}
+			State.setCurrentState(gameState);
 			
-		window.getPanel().reset(new Random().nextBoolean());
-		
-		State.setCurrentState(gameState);
+		} else {
+			
+			for (int i = 0; i < 7; i++) {
+				for(int j = 0; j < 7; j++) {
+					window.getJPanel()[i][j].delFigure();
+				}
+			}
+				
+			for (int i = 0; i < 9; i++) {
+				window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
+				window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+			}
+				
+			window.getPanel().reset(new Random().nextBoolean());
+			
+			State.setCurrentState(gameState);
+			
+		}
 		
 	}
 	

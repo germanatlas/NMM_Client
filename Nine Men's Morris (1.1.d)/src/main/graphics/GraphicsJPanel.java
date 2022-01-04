@@ -33,8 +33,8 @@ public class GraphicsJPanel extends JPanel{
 	
 	private final BufferedImage WOOD = graphicsLoader.loadImage("/textures/wood.png");
 	
-	private int moveToX, 
-				moveToY, 
+	private int moveToX, millX,
+				moveToY, millY,
 				repetition, 
 				roundsWithoutMill,
 				count, 
@@ -138,9 +138,9 @@ public class GraphicsJPanel extends JPanel{
 							tempPanel.setFigure(playerOne[count / 2]);
 							if (!mill) {
 								playerOne[count / 2].move(moveToX, moveToY);
+								sendOnlineData(0, "", moveToX + "-" + moveToY);
 							}
 
-							sendOnlineData(0, "", moveToX + "-" + moveToY);
 							
 						}
 						alreadyPressed = true;
@@ -197,6 +197,8 @@ public class GraphicsJPanel extends JPanel{
 								roundsWithoutMill = 0;
 								lastMill = color;
 								mill = true;
+								//6 if black has mill, 5 if white has mill
+								sendOnlineData(color?6:5, isMoving.getX() + "-" + isMoving.getY(), moveToX + "-" + moveToY);
 							}
 							else if(lastMill == color) {
 								
@@ -317,6 +319,8 @@ public class GraphicsJPanel extends JPanel{
 							count--;
 							
 							lastMill = color;
+							//6 if black has mill, 5 if white has mill
+							sendOnlineData(color?6:5, millX + "-" + millY, moveToX + "-" + moveToY);
 						}
 						else if(lastMill == !color) {
 							roundsWithoutMill++;
@@ -330,6 +334,8 @@ public class GraphicsJPanel extends JPanel{
 							count--;
 							
 							lastMill = color;
+							//6 if black has mill, 5 if white has mill
+							sendOnlineData(color?6:5, millX + "-" + millY, moveToX + "-" + moveToY);
 						}
 						else if(lastMill == !color) {
 							roundsWithoutMill++;
@@ -344,12 +350,11 @@ public class GraphicsJPanel extends JPanel{
 				count++;
 			}
 
-			//first field that can be repeated (should be saved in the server and if needed sent to the clients)
 					if(count > 17 && !alreadyAdded) {
 						
 						String s = getStringFromBoard();
-						/*save in server and send to client if needed*/ repetitiveField.add(s);
-						/*handled by server*/ alreadyAdded = true;
+						repetitiveField.add(s);
+						alreadyAdded = true;
 					}
 
 	//Daniel
@@ -1291,6 +1296,10 @@ public class GraphicsJPanel extends JPanel{
 	
 	public void setOnline(boolean isOnline) {
 		this.online = isOnline;
+	}
+	
+	public void setActiveUser(boolean b) {
+		this.activeUser = b;
 	}
 	
 	public void setOnlineManager(OnlineManager onlineManager) {

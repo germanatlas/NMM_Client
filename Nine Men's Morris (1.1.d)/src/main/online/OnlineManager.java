@@ -7,7 +7,7 @@ import main.game.Game;
 public class OnlineManager {
 	
 	private Client client;
-	private final int port;
+	private final int port = 42069;
 	private boolean	activeClient;
 	private Game game;
 	//private boolean init;
@@ -15,7 +15,6 @@ public class OnlineManager {
 	public OnlineManager(Game game) {
 		
 		activeClient = false;
-		port = 42069;
 		this.game = game;
 		
 		createClient();
@@ -24,7 +23,7 @@ public class OnlineManager {
 			
 			new Thread(() -> {
 				
-				connectionloop:
+				
 				while(true) {
 					
 					if(activeClient) {
@@ -32,8 +31,7 @@ public class OnlineManager {
 						while(client.getIfActive());
 						client.stopClient();
 						activeClient = false;
-						System.out.println("Connection to Server ended."); //TODO
-						break connectionloop;
+						System.out.println("Connection to Server ended.");
 						
 					}
 					
@@ -77,9 +75,14 @@ public class OnlineManager {
 			if(address == "") address = "localhost";
 			try {
 				client = new Client(address, port);
+				game.getWindow().getLabel().setText("Connected.");
+				game.getWindow().repaint();
 				activeClient = true;
-				System.out.println("Connected Client.");
+				System.out.println("Connected to Server.");
 			} catch (IOException e) {
+				game.getWindow().getLabel().setText("Cannot reach Server");
+				System.out.println(game.getWindow().getLabel().getText());
+				game.getWindow().repaint();
 				System.out.println("Client Start Error:\n" + e);
 			}
 			

@@ -56,6 +56,7 @@ public class Client {
 			
 			int count;
 			try {
+				//idk, just many bytes as buffer
 				byte[] buffer = new byte[2048];
 				count = in.read(buffer);
 				System.out.println(count + " Bytes Received.");
@@ -63,7 +64,6 @@ public class Client {
 				byte[] pack = new byte[count];
 				pack = shorten(buffer, count);
 				Object obj = toObject(pack);
-				//TODO
 				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
@@ -79,7 +79,6 @@ public class Client {
 	}
 	
 	public void sendData(Object data) {
-		//TODO
 		
 		if(isInitiated) {
 			
