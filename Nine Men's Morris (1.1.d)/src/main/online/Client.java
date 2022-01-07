@@ -106,7 +106,7 @@ public class Client {
 		return ip;
 	}
 
-	private static byte[] toBytes(Object obj) throws IOException {
+	private byte[] toBytes(Object obj) throws IOException {
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -122,7 +122,7 @@ public class Client {
 		
 	}
 
-	private static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
+	private Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
 		
 		ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
 		ObjectInputStream ois = new ObjectInputStream(bis);
@@ -132,7 +132,7 @@ public class Client {
 		
 	}
 
-	private static byte[] shorten(byte[] srcmat, int limit) {
+	private byte[] shorten(byte[] srcmat, int limit) {
 		
 		byte[] b = new byte[limit];
 		

@@ -13,13 +13,13 @@ public class DataPackage implements Serializable {
 	
 	/*
 	 * status:
-	 * 0 - active game - placing
 	 * 1 - active game
 	 * 2 - draw
 	 * 3 - white won
 	 * 4 - black won
-	 * 5 - white has mill
-	 * 6 - black has mill
+	 * 5 - mill
+	 * 6 - result mill
+	 * 98 - end game
 	 * 99 - game start
 	 * 
 	 * */
