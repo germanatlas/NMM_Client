@@ -57,9 +57,9 @@ public class GameState extends State{
 			escapePressed = false;
 			State.setCurrentState(game.getMenuState());
 		}
-		
-		jPanel.tick();
+
 		panel.setVisible(true);
+		jPanel.tick();
 		
 	}
 
@@ -75,6 +75,8 @@ public class GameState extends State{
 		this.closeButton.setVisible(false);
 		
 		this.optionButton.setVisible(false);
+
+		panel.setVisible(true);
 		
 	}
 

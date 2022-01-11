@@ -53,7 +53,10 @@ public class GraphicsJPanel extends JPanel {
 					alreadyPressed,
 					activeUser,
 					online,
-					stalemateOnline;
+					stalemateOnline,
+					placingPhase,
+					initMoving,
+					iHaveMill;
 	
 	private Figure [] playerOne, 
 					  playerTwo;
@@ -82,6 +85,7 @@ public class GraphicsJPanel extends JPanel {
 		this.playerTwoFigureCount = 9;
 		this.count = -1;
 		
+		this.placingPhase = true;
 		this.mill = false;
 		this.color = random.nextBoolean();
 		this.lastMill = false;
@@ -105,6 +109,43 @@ public class GraphicsJPanel extends JPanel {
 	public void tick() {
 	
 	//Daniel
+		//messages		
+		String msg = "";
+				
+		if(!color) {
+			
+			if(activeUser) {
+				msg += "White (YOU): ";
+			} else {
+				msg += "Black (NMY): ";
+			}
+			
+		} else {
+			
+			if(activeUser) {
+				msg += "Black (YOU): ";
+			} else {
+				
+				msg += "White (NMY): ";
+			}
+			
+		}
+		
+		if(mill) {
+			msg += "mill";
+		} else {
+			
+			if(count < 17) {
+				msg += "place a stone";
+			} else {
+				msg += "choose a stone";
+			}
+			
+		}
+		
+		game.getWindow().getLabel().setText(msg);
+		
+		this.repaint();
 		
 		if(online) {
 			
@@ -118,303 +159,32 @@ public class GraphicsJPanel extends JPanel {
 				
 			}
 			
-			//System.out.println("IST ONLINE");
-			
-			if(!mill) {
-				//PlacingPhase
-			
+			if(!alreadyPressed) {
 				
-				if(!alreadyPressed) {
+				if(activeUser && game.getMouseManager().isLeftPressed() && (placingPhase || mill)) {
 					
-					if(count < 17 && game.getMouseManager().isLeftPressed() && !game.getMouseManager().getPanelPressed().isFigurePlaced() && activeUser) {
-						
-						tempPanel = game.getMouseManager().getPanelPressed();
-						moveToX = game.getMouseManager().getPanelPressedX() + 5;
-						moveToY = game.getMouseManager().getPanelPressedY() + 5;
-						
-						count++;
-						
-						if (activeUser) {
-							tempPanel.setFigure(playerOne[count / 2]);
-							if (!mill) {
-								playerOne[count / 2].move(moveToX, moveToY);
-							}
-							
-							mill = checkMill(tempPanel);
-							if(mill) {
-								roundsWithoutMill = 0;
-								count--;
-								
-								lastMill = activeUser;
-								//6 if black has mill, 5 if white has mill
-								sendOnlineData(5, "", moveToX + "-" + moveToY);
-							}
-							else {
-								sendOnlineData(1, "", moveToX + "-" + moveToY);
-							}
-							
-							if(lastMill == !activeUser) {
-								roundsWithoutMill++;
-							}
-
-							
-						}
-						alreadyPressed = true;
-					}
+					int toX = game.getMouseManager().getPanelPressedX() + 5,
+						toY = game.getMouseManager().getPanelPressedY() + 5;
 					
+					sendOnlineData(0,0,toX,toY);
+					alreadyPressed = true;
+					
+				} else if(activeUser && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
+					
+					isMoving = game.getMouseManager().getPanelPressed().getFigure();
+					
+				} else if(activeUser && game.getMouseManager().isLeftPressed() && isMoving != null) {
+					int fromX = isMoving.getX(),
+						fromY = isMoving.getY();
+					int toX = game.getMouseManager().getPanelPressedX() + 5,
+						toY = game.getMouseManager().getPanelPressedY() + 5;
+					sendOnlineData(fromX,fromY,toX,toY);
+					
+					alreadyPressed = true;
 				}
-			
-				//choose moving Piece
-				if(!alreadyPressed) {
-					
-					/*
-					 * if(server) receive;
-					 * else {send to server};
-					 */
-					if(count >= 17 && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-						alreadyPressed = true;
-						
-						//black
-						if (color && game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
-							isMoving = game.getMouseManager().getPanelPressed().getFigure();
-							cursor = game.getMouseManager().getPanelPressed();
-						}
-					
-						//white
-						if(!color && !game.getMouseManager().getPanelPressed().getFigure().getFigureType()) {
-							isMoving = game.getMouseManager().getPanelPressed().getFigure();
-							cursor = game.getMouseManager().getPanelPressed();
-						}
-					}
-				}
-				
-				//MovePhase
-				if(isMoving != null) {
-					//black
-					if(playerOneFigureCount > 3 && !game.getMouseManager().getPanelPressed().isFigurePlaced() && activeUser) {
-						
-						tempPanel = game.getMouseManager().getPanelPressed();
-					
-						
-						if(tempPanel.isNeighborFrom(cursor)) {
-							
-							moveToX = game.getMouseManager().getPanelPressedX() + 5;
-							moveToY = game.getMouseManager().getPanelPressedY() + 5;
-
-							int tmpX = isMoving.getX(), tmpY = isMoving.getY();
-							isMoving.move(moveToX, moveToY);
-							tempPanel.setFigure(isMoving);
-							
-							cursor.delFigure();
-							isMoving = null;
-							
-	//Max
-							if(checkMill(tempPanel)) {
-								
-								roundsWithoutMill = 0;
-								lastMill = color;
-								mill = true;
-								//6 if black has mill, 5 if white has mill
-								sendOnlineData(5, tmpX + "-" + tmpY, moveToX + "-" + moveToY);
-							}
-							else if(lastMill == activeUser) {
-								
-								roundsWithoutMill++;
-							}
-
-							if(!mill) {
-								sendOnlineData(1, tmpX + "-" + tmpY, moveToX + "-" + moveToY);
-							}
-							
-							tempPanel = null;
-							
-							if(checkForRepetition(activeUser)) {
-								repetition++;
-							}
-							else {
-								repetition = 0;
-							}
-						}
-					}
-					
-				}
+			}
 
 	//Daniel
-				//JumpPhase
-				if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
-					
-					if(isMoving != null) {
-					
-						if(activeUser && !game.getMouseManager().getPanelPressed().isFigurePlaced()) {
-							
-							tempPanel = game.getMouseManager().getPanelPressed();
-						
-							moveToX = game.getMouseManager().getPanelPressedX() + 5;
-							moveToY = game.getMouseManager().getPanelPressedY() + 5;
-
-							int tmpX = isMoving.getX(), tmpY = isMoving.getY();
-							isMoving.move(moveToX, moveToY);
-							tempPanel.setFigure(isMoving);
-							
-							cursor.delFigure();
-							isMoving = null;
-
-	//Max					
-							if (checkMill(tempPanel)) {
-								
-								lastMill = activeUser;
-								mill = true;
-								//5 if mill
-								sendOnlineData(5, tmpX + "-" + tmpY, moveToX + "-" + moveToY);
-							}
-							else if(lastMill == activeUser) {
-								roundsWithoutMill++;
-							}
-							
-							if(!mill) {
-								sendOnlineData(1, tmpX + "-" + tmpY, moveToX + "-" + moveToY);
-							}
-							
-							tempPanel = null;
-							
-							if(checkForRepetition(color)) {
-
-								repetition++;
-							}
-							else {
-								repetition = 0;
-							}
-							
-						}
-					}
-				}
-				
-	//Max
-				//checkForEnd
-				if(checkStalemate()) {
-					sendOnlineData(2, "", "");
-					endState = new EndState(game);
-					State.setCurrentState(endState);
-				}
-				if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
-				}
-				else if(playerTwoFigureCount < 3) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
-				}
-				
-			}
-			
-			else if (!alreadyPressed && game.getMouseManager().isLeftPressed() && game.getMouseManager().getPanelPressed().isFigurePlaced() && activeUser)
-			{
-				alreadyPressed = true;
-				if(withoutMill(!color)) {
-					if(!checkMill(game.getMouseManager().getPanelPressed())) {
-						
-						while (!removeFigure(game.getMouseManager().getPanelPressed()));
-						sendOnlineData(6, "", game.getMouseManager().getPanelPressedX() + "-" + game.getMouseManager().getPanelPressedY());
-						mill = false;
-						
-					}
-				}
-				else if(!withoutMill(!color)){
-
-					while (!removeFigure(game.getMouseManager().getPanelPressed()));
-					sendOnlineData(6, "", game.getMouseManager().getPanelPressedX() + "-" + game.getMouseManager().getPanelPressedY());
-					mill = false;
-					
-				}
-				//check for end of game
-				if(checkStalemate()) {
-					sendOnlineData(2, "", "");
-					endState = new EndState(game);
-					State.setCurrentState(endState);
-				}
-				if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
-				}
-				else if(playerTwoFigureCount < 3) {
-					endState = new EndState(game, !color);
-					State.setCurrentState(endState);
-				}
-			}
-			
-	//Max		
-			//checks for mill while placing phase
-			/*if(count >= -1 && count <= 17) {
-				if(tempPanel != null) {
-					
-					if(activeUser) {
-						mill = checkMill(tempPanel);
-						if(mill) {
-							roundsWithoutMill = 0;
-							count--;
-							
-							lastMill = activeUser;
-							//6 if black has mill, 5 if white has mill
-							sendOnlineData(5, "", moveToX + "-" + moveToY);
-						}
-						else if(lastMill == !activeUser) {
-							roundsWithoutMill++;
-						}
-					}
-					
-				}
-				tempPanel = null;
-			}*/
-			
-			if(count == 17) { 
-				count++;
-			}
-
-					if(count > 17 && !alreadyAdded) {
-						
-						String s = getStringFromBoard();
-						repetitiveField.add(s);
-						alreadyAdded = true;
-					}
-
-	//Daniel
-			//messages		
-			String msg = "";
-					
-			if(!color) {
-				
-				if(activeUser) {
-					msg += "White (YOU): ";
-				} else {
-					msg += "Black (NMY): ";
-				}
-				
-			} else {
-				
-				if(activeUser) {
-					msg += "Black (YOU): ";
-				} else {
-					
-					msg += "White (NMY): ";
-				}
-				
-			}
-			
-			if(mill) {
-				msg += "mill";
-			} else {
-				
-				if(count < 17) {
-					msg += "place a stone";
-				} else {
-					msg += "choose a stone";
-				}
-				
-			}
-			
-			
-			
-			game.getWindow().getLabel().setText(msg);
 			
 		}
 			 // ONLINE
@@ -832,17 +602,47 @@ public class GraphicsJPanel extends JPanel {
 		
 		}
 		
-		this.repaint();
-		
 	}
 	
-	private void sendOnlineData(int status, String fromCoords, String toCoords) {
+	private void sendOnlineData(int fromX, int fromY, int toX, int toY) {
+		int tX, tY, fX, fY;
 		
-		String s = fromCoords + "_" + toCoords;
-		System.out.println(s);
+		if (fromX < 270) 		fX = 0;
+		else if (fromX < 350) 	fX = 1;
+		else if(fromX < 460) 	fX = 2;
+		else if(fromX < 500) 	fX = 3;
+		else if(fromX < 600) 	fX = 4;
+		else if(fromX < 700) 	fX = 5;
+		else 					fX = 6;
+		
+		if (fromY < 100) 		fY = 0;
+		else if (fromY < 200) 	fY = 1;
+		else if(fromY < 300) 	fY = 2;
+		else if(fromY < 400) 	fY = 3;
+		else if(fromY < 470) 	fY = 4;
+		else if(fromY < 550) 	fY = 5;
+		else 					fY = 6;
+		
+		if (toX < 270) 			tX = 0;
+		else if (toX < 350) 	tX = 1;
+		else if(toX < 460) 		tX = 2;
+		else if(toX < 500) 		tX = 3;
+		else if(toX < 600) 		tX = 4;
+		else if(toX < 700) 		tX = 5;
+		else 					tX = 6;
+		
+		if (toY < 100) 			tY = 0;
+		else if (toY < 200) 	tY = 1;
+		else if(toY < 300) 		tY = 2;
+		else if(toY < 400) 		tY = 3;
+		else if(toY < 470) 		tY = 4;
+		else if(toY < 550) 		tY = 5;
+		else 					tY = 6;
+		
+		System.out.println("Send: " + 0 + " " + fX + " " + fY + " " + tX + " " + tY);
 		System.out.println("PC: " + playerOneFigureCount + " " + playerTwoFigureCount);
-		oMan.sendData(new DataPackage(status, s));
-		if(status != 5) activeUser = false;
+		oMan.sendData(new DataPackage(0, fX, fY, tX, tY));
+		activeUser = false;
 		
 	}
 	
@@ -855,23 +655,78 @@ public class GraphicsJPanel extends JPanel {
 			return;
 			
 		}
-
-		System.out.println(dp.getStatus() + "  " + dp.getMove());
 		
-		if(dp.getStatus() == 1) {
-			
-			if(count < 17) {
-				//Placing Phase
+		System.out.println(dp.getStatus() + " " + dp.getFromX() + " " + dp.getFromY() + " " + dp.getToX() + " " + dp.getToY());
+		
+		int s = dp.getStatus();
+		
+		if(s < 6) { // General game moves received from enemy
+
+			if(s == 0) {
+				placingPhase = true;
 				count++;
-				
+			} else {
+				placingPhase = false;
 			}
-			
-			//TODO
-			//Spielstatus anpassen
 			drawBoardFromString(dp);
 			activeUser = true;
+			if(count == 17) { 
+				count++;
+			}
 			
-		} else if(dp.getStatus() <= 4) {
+		} else if(s == 6) { // Mill allowed / Enemy has made mill
+			
+			drawBoardFromString(dp);
+			mill = false;
+			count--;
+			activeUser = !iHaveMill;
+			
+		} else if(s == 20) { // move allowed, mill
+			
+			drawBoardFromString(dp);
+			mill = true;
+			activeUser = true;
+			iHaveMill = true;
+			
+			if(s == 0) {
+				placingPhase = true;
+				count++;
+			} else {
+				placingPhase = false;
+			}
+			if(count == 17) { 
+				count++;
+			}
+			
+		} else if(s == 21) {
+			
+			drawBoardFromString(dp);
+			iHaveMill = false;
+			mill = true;
+			activeUser = false;
+			
+		} else if(s == 50) { //move was not allowed by server
+			
+			activeUser = true;
+			
+		} else if(s == 51) { //move was allowed by server, now getting confirmed here
+
+			if(placingPhase) {
+				count++;
+			}
+			drawBoardFromString(dp);
+			activeUser = false;
+			
+		} else if(s == 98) {
+			
+			reset(dp.getFromX()%2 == 1);
+			
+		}
+		
+		
+		
+			
+		/*else if(dp.getStatus() <= 4) {
 
 			if(dp.getStatus() == 2) {
 				//Stalemate / Draw
@@ -895,36 +750,7 @@ public class GraphicsJPanel extends JPanel {
 			endID = dp.getStatus();
 			activeUser = false;
 			
-		} else if(dp.getStatus() == 5) {
-			
-			if(count < 17) {
-				//Placing Phase
-				count++;
-				
-			}
-			
-			drawBoardFromString(dp);
-			count--;
-			mill = true;
-			activeUser = false;
-			
-		} else if(dp.getStatus() == 6) {
-
-			drawBoardFromString(dp);
-			roundsWithoutMill = 0;
-			lastMill = !color;
-			mill = false;
-			activeUser = true;
-			
-		} else if(dp.getStatus() == 98) {
-			//TODO
-			
-		} else if(dp.getStatus() == 99) {
-			activeUser = Integer.parseInt(dp.getMove())/10 == 1;
-			boolean thisColor = Integer.parseInt(dp.getMove())%10 == 1;
-			reset(thisColor);
-			
-		}
+		} */
 		
 		System.out.println("PC: " + playerOneFigureCount + " " + playerTwoFigureCount);
 		
@@ -963,98 +789,73 @@ public class GraphicsJPanel extends JPanel {
 	
 	private void drawBoardFromString(DataPackage dp) {
 		
-		String move = dp.getMove();
-		int status = dp.getStatus();
-		
+		int s = dp.getStatus();
+		System.out.println("Count " + count);
 		MyJPanel[][] f = game.getWindow().getJPanel();
-		String[] data = move.split("_");
 		
-		String[] from = data[0].split("-");
-		String[] to = data[1].split("-");
+		int 	fX = dp.getFromX(), fY = dp.getFromY(),
+				tX = dp.getToX(), tY = dp.getToY();
 		
-		
-		
-		if((status == 1 || status == 5)) {
+		if(s == 0 || (!initMoving && s == 1)) { // Placing Phase Move by Enemy
 			
-			int x = Integer.parseInt(to[0]);
-			int y = Integer.parseInt(to[1]);
-			int valxt = 0, valyt = 0;
+			tempPanel = f[tX][tY];
+			tempPanel.setFigure(playerTwo[count / 2]);
+			playerTwo[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+			tempPanel = null;
 			
-			if (x < 270) 		valxt = 0;
-			else if (x < 350) 	valxt = 1;
-			else if(x < 460) 	valxt = 2;
-			else if(x < 500) 	valxt = 3;
-			else if(x < 600) 	valxt = 4;
-			else if(x < 700) 	valxt = 5;
-			else 				valxt = 6;
+			if(s != 0)
+				initMoving = true;
 			
-			if (y < 100) 		valyt = 0;
-			else if (y < 200) 	valyt = 1;
-			else if(y < 300) 	valyt = 2;
-			else if(y < 400) 	valyt = 3;
-			else if(y < 470) 	valyt = 4;
-			else if(y < 550) 	valyt = 5;
-			else 				valyt = 6;
+		} else if(s < 6) { //Any other phase
 			
-			if(count > 17) {
-				int xf = Integer.parseInt(from[0]);
-				int yf = Integer.parseInt(from[1]);
-				int valxf = 0, valyf = 0;
+			tempPanel = f[tX][tY];
+			tempPanel.setFigure(f[fX][fY].getFigure());
+			f[fX][fY].getFigure().move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+			f[fX][fY].delFigure();
+			tempPanel = null;
+			
+		} else if(s == 6) {
+			
+			removeFigureOnline(f[tX][tY]);
+			
+		} else if(s == 51 || s == 20) { //move allowed by server
+			
+			if(placingPhase) {
 				
-				if (xf < 270) 		valxf = 0;
-				else if (xf < 350) 	valxf = 1;
-				else if(xf < 460) 	valxf = 2;
-				else if(xf < 500) 	valxf = 3;
-				else if(xf < 600) 	valxf = 4;
-				else if(xf < 700) 	valxf = 5;
-				else 				valxf = 6;
-				
-				if (yf < 100) 		valyf = 0;
-				else if (yf < 200) 	valyf = 1;
-				else if(yf < 300) 	valyf = 2;
-				else if(yf < 400) 	valyf = 3;
-				else if(yf < 470) 	valyf = 4;
-				else if(yf < 550) 	valyf = 5;
-				else 				valyf = 6;
-				System.out.println("Vals: " + valxf + " " + valyf);
-				tempPanel = f[valxt][valyt];
-				tempPanel.setFigure(f[valxf][valyf].getFigure());
-				f[valxf][valyf].getFigure().move(x, y);
-				f[valxf][valyf].delFigure();
+				tempPanel = f[tX][tY];
+				tempPanel.setFigure(playerOne[count / 2]);
+				playerOne[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
 				tempPanel = null;
-				return;
+				
+			} else {
+				
+				tempPanel = f[tX][tY];
+				tempPanel.setFigure(f[fX][fY].getFigure());
+				f[fX][fY].getFigure().move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+				f[fX][fY].delFigure();
+				tempPanel = null;
 				
 			}
 			
-			System.out.println(valxt + " " + valyt);
-			tempPanel = f[valxt][valyt];
-			tempPanel.setFigure(playerTwo[count / 2]);
-			playerTwo[count / 2].move(x, y);
-			tempPanel = null;
+		} else if(s == 21) { // Enemy has mill
 			
-		} else if(status == 6) {
-			int x = Integer.parseInt(to[0]);
-			int y = Integer.parseInt(to[1]);
-			int valx = 0, valy = 0;
+			if(placingPhase) {
+				
+				tempPanel = f[tX][tY];
+				tempPanel.setFigure(playerTwo[count / 2]);
+				playerOne[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+				tempPanel = null;
+				
+			} else {
+				
+				tempPanel = f[tX][tY];
+				tempPanel.setFigure(f[fX][fY].getFigure());
+				f[fX][fY].getFigure().move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+				f[fX][fY].delFigure();
+				tempPanel = null;
+				
+			}
 			
-			if (x < 270) 		valx = 0;
-			else if (x < 350) 	valx = 1;
-			else if(x < 460) 	valx = 2;
-			else if(x < 500) 	valx = 3;
-			else if(x < 600) 	valx = 4;
-			else if(x < 700) 	valx = 5;
-			else 				valx = 6;
-			
-			if (y < 100) 		valy = 0;
-			else if (y < 200) 	valy = 1;
-			else if(y < 300) 	valy = 2;
-			else if(y < 400) 	valy = 3;
-			else if(y < 470) 	valy = 4;
-			else if(y < 550) 	valy = 5;
-			else 				valy = 6;
-			System.out.println(valx + " x - y " + valy + "\t" + f[valx][valy].getFieldX() + " " + f[valx][valy].getFieldY());
-			removeFigureOnline(f[valx][valy]);
-		
 		}
 		
 		
@@ -1154,7 +955,7 @@ public class GraphicsJPanel extends JPanel {
 					
 					if(endID != 4) {
 						
-						sendOnlineData(4, "", "");
+						//sendOnlineData(4, "", "");
 						
 					}
 					
@@ -1253,6 +1054,8 @@ public class GraphicsJPanel extends JPanel {
 		this.playerTwoFigureCount = 9;
 		this.count = -1;
 		
+		this.initMoving = false; if(!activeUser) initMoving = true;
+		this.placingPhase = true;
 		this.mill = false;
 		this.color = color;
 		this.lastMill = false;

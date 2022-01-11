@@ -85,8 +85,8 @@ public class Game implements Runnable{
 			lastTime = now;
 			
 			if(delta >= 1) {
-				tick();
 				render();
+				tick();
 				delta--;
 			} 
 

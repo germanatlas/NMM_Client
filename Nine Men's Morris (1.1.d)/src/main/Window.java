@@ -305,9 +305,8 @@ public class Window extends JFrame{
 						if(oMan.getIfActive()) {
 
 							DataPackage dp = oMan.receiveData();
-							System.out.println(dp.getStatus() + " " + dp.getMove());
 							
-							if(dp.getStatus() == 99) {
+							if(dp.getStatus() == 98) {
 								
 								setRunning(true);
 								isOnline = true;
@@ -315,9 +314,9 @@ public class Window extends JFrame{
 								panel.setOnlineManager(oMan);
 								panel.setOnline(isOnline);
 
-								panel.setActiveUser(Integer.parseInt(dp.getMove())/10 == 1);
+								panel.setActiveUser(dp.getFromY() % 2 != 1);
 								//Starts a new game, online and which color the local player has
-								game.reset(isOnline, Integer.parseInt(dp.getMove())%10 == 1);
+								game.reset(isOnline, dp.getFromX() % 2 == 1);
 								
 							}
 							
