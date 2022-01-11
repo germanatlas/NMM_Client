@@ -55,7 +55,7 @@ public class EndState extends State{
 		
 		panel.setVisible(true);
 		
-		if(color == null) {
+		/*if(color == null) {
 			label.setText("Stalemate!");
 		}
 		else if(color) {
@@ -63,7 +63,7 @@ public class EndState extends State{
 		}
 		else if(!color) {
 			label.setText("White wins!");
-		}
+		}*/
 		
 		startButton.setVisible(true);
 		startButton.setOpaque(false);

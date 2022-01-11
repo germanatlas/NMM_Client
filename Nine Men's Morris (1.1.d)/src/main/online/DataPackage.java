@@ -8,26 +8,18 @@ public class DataPackage implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private int status;
-	private String move;
+	private int status, fromX, fromY, toX, toY;
 	
-	/*
-	 * status:
-	 * 1 - active game
-	 * 2 - draw
-	 * 3 - white won
-	 * 4 - black won
-	 * 5 - mill
-	 * 6 - result mill
-	 * 98 - end game
-	 * 99 - game start
-	 * 
-	 * */
+	//Status is the same as server state enums
 	
-	public DataPackage(int status, String move) {
+	public DataPackage(int status, int fromX, int fromY, int toX, int toY) {
 		
 		this.status = status;
-		this.move = move;
+		this.fromX = fromX;
+		this.toX = toX;
+		this.fromY = fromY;
+		this.toY = toY;
+		
 		
 	}
 	
@@ -35,8 +27,20 @@ public class DataPackage implements Serializable {
 		return status;	
 	}
 	
-	public String getMove() {
-		return move;
+	public int getToX() {
+		return toX;	
+	}
+	
+	public int getToY() {
+		return toY;	
+	}
+	
+	public int getFromX() {
+		return fromX;	
+	}
+	
+	public int getFromY() {
+		return fromY;	
 	}
 
 }

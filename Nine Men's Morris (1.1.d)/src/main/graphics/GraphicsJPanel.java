@@ -241,7 +241,7 @@ public class GraphicsJPanel extends JPanel {
 
 	//Daniel
 				//JumpPhase
-				if(playerTwoFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
+				if(playerOneFigureCount == 3 && !alreadyPressed && game.getMouseManager().isLeftPressed()) {
 					
 					if(isMoving != null) {
 					
@@ -296,11 +296,11 @@ public class GraphicsJPanel extends JPanel {
 					endState = new EndState(game);
 					State.setCurrentState(endState);
 				}
-				if(playerOneFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+				if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
 					endState = new EndState(game, !color);
 					State.setCurrentState(endState);
 				}
-				else if(playerOneFigureCount < 3) {
+				else if(playerTwoFigureCount < 3) {
 					endState = new EndState(game, !color);
 					State.setCurrentState(endState);
 				}
@@ -325,6 +325,20 @@ public class GraphicsJPanel extends JPanel {
 					sendOnlineData(6, "", game.getMouseManager().getPanelPressedX() + "-" + game.getMouseManager().getPanelPressedY());
 					mill = false;
 					
+				}
+				//check for end of game
+				if(checkStalemate()) {
+					sendOnlineData(2, "", "");
+					endState = new EndState(game);
+					State.setCurrentState(endState);
+				}
+				if(playerTwoFigureCount > 3 && count > 17 && !checkForLegalMoves(color)) {
+					endState = new EndState(game, !color);
+					State.setCurrentState(endState);
+				}
+				else if(playerTwoFigureCount < 3) {
+					endState = new EndState(game, !color);
+					State.setCurrentState(endState);
 				}
 			}
 			
@@ -1187,7 +1201,7 @@ public class GraphicsJPanel extends JPanel {
 			
 		}
 		
-		if(m.getFigure().getColor()) {
+		if(m.getFigure().getColor() && !online) {
 			playerOneFigureCount--;
 		}
 		else {
@@ -1207,7 +1221,13 @@ public class GraphicsJPanel extends JPanel {
 			return false;
 			
 		}
-		playerTwoFigureCount--;
+		
+		if(m.getFigure().getColor() == color) {
+			playerOneFigureCount--;
+		}
+		else {
+			playerTwoFigureCount--;
+		}
 		
 		m.getFigure().delete();
 		m.delFigure();
