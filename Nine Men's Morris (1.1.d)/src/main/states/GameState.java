@@ -23,7 +23,8 @@ public class GameState extends State{
 					closeButton, 
 					optionButton, 
 					joinButton,
-					continueButton;
+					continueButton,
+					exitbButton;
 	
 	private JPanel panel;
 	
@@ -38,6 +39,7 @@ public class GameState extends State{
 		this.joinButton = game.getWindow().getJoinButton();
 		this.closeButton = game.getWindow().getCloseButton();
 		this.optionButton = game.getWindow().getOptionButton();
+		this.exitbButton = game.getWindow().getExitButton();
 		
 		
 		
@@ -75,6 +77,8 @@ public class GameState extends State{
 		this.closeButton.setVisible(false);
 		
 		this.optionButton.setVisible(false);
+		
+		this.exitbButton.setVisible(false);
 
 		panel.setVisible(true);
 		

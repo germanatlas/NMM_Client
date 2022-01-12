@@ -50,12 +50,19 @@ public class MenuState extends State {
 	@Override
 	public void render(Graphics g) {
 		
-		startButton.setVisible(true);
 		continueButton.setVisible(true);
 		joinButton.setVisible(true);
 		optionButton.setVisible(true);
 		closeButton.setVisible(true);
-		exitButton.setVisible(false);
+		//exitButton.setVisible(false);
+		
+		if(game.getWindow().getIfOnline()) {
+			exitButton.setVisible(true);
+			startButton.setVisible(false);
+		} else {
+			exitButton.setVisible(false);
+			startButton.setVisible(true);
+		}
 	
 	}
 	

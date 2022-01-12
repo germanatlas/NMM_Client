@@ -646,7 +646,7 @@ public class GraphicsJPanel extends JPanel {
 		
 	}
 	
-	private void getOnlineData() {
+	private void getOnlineData() {//TODO
 		
 		DataPackage dp = oMan.receiveData();
 		
@@ -678,29 +678,30 @@ public class GraphicsJPanel extends JPanel {
 			
 			drawBoardFromString(dp);
 			mill = false;
-			count--;
 			activeUser = !iHaveMill;
 			
 		} else if(s == 20) { // move allowed, mill
+			
+			count++;
+			if(count > 17)
+				placingPhase = false;
 			
 			drawBoardFromString(dp);
 			mill = true;
 			activeUser = true;
 			iHaveMill = true;
 			
-			if(s == 0) {
-				placingPhase = true;
-				count++;
-			} else {
-				placingPhase = false;
-			}
 			if(count == 17) { 
 				count++;
 			}
 			
-		} else if(s == 21) {
+		} else if(s == 21) { // nmy made mill
 			
+			count++;
+			if(count > 17)
+				placingPhase = false;
 			drawBoardFromString(dp);
+			//count--;
 			iHaveMill = false;
 			mill = true;
 			activeUser = false;
@@ -717,9 +718,53 @@ public class GraphicsJPanel extends JPanel {
 			drawBoardFromString(dp);
 			activeUser = false;
 			
-		} else if(s == 98) {
+		} else if(s == 98) { //Start new Game
 			
 			reset(dp.getFromX()%2 == 1);
+			
+		} else if(s == 99) {
+			
+			endID = 5;
+			endState = new EndState(game, true);
+			State.setCurrentState(endState);
+			
+		} else if(s == 23) { //YOU WIN
+			
+			if(color) { //Black wins (YOU)
+				endID = 4;
+				endState = new EndState(game, true);
+				State.setCurrentState(endState);
+			}
+			else { //White wins (YOU)
+				endID = 3;
+				endState = new EndState(game, false);
+				State.setCurrentState(endState);
+				
+			}
+			drawBoardFromString(dp);
+			
+		} else if(s == 24) { //NMY WIN
+			
+			if(!color) { //Black wins (NMY)
+				endID = 4;
+				endState = new EndState(game, true);
+				State.setCurrentState(endState);
+			}
+			else { //White wins (NMY)
+				endID = 3;
+				endState = new EndState(game, false);
+				State.setCurrentState(endState);
+				
+			}
+			drawBoardFromString(dp);
+			
+		} else if(s == 8) {
+			
+			stalemateOnline = true;
+			endState = new EndState(game);
+			State.setCurrentState(endState);
+			drawBoardFromString(dp);
+			
 			
 		}
 		
@@ -756,37 +801,6 @@ public class GraphicsJPanel extends JPanel {
 		
 	}
 	
-	private String getStringFromBoard() {
-
-		MyJPanel[][] f = game.getWindow().getJPanel();
-		String s = "";
-		
-		for (int i = 0; i < f.length; i++) {
-			for (int j = 0; j < f[i].length; j++) {
-				if (f[i][j].isFigurePlaced()) {
-					if (f[i][j].getFigure().getColor()) {
-						
-						s += "2";
-						
-					}
-					else {
-						
-						s += "1";
-						
-					}
-				}
-				else {
-					
-					s += "0";
-					
-				}
-			}
-		}
-		
-		return s;
-		
-	}
-	
 	private void drawBoardFromString(DataPackage dp) {
 		
 		int s = dp.getStatus();
@@ -806,7 +820,7 @@ public class GraphicsJPanel extends JPanel {
 			if(s != 0)
 				initMoving = true;
 			
-		} else if(s < 6) { //Any other phase
+		} else if(s < 6 || s == 23 || s == 24 || s == 8) { //Any other phase, writing after win, lose or stalemate
 			
 			tempPanel = f[tX][tY];
 			tempPanel.setFigure(f[fX][fY].getFigure());
@@ -840,10 +854,10 @@ public class GraphicsJPanel extends JPanel {
 		} else if(s == 21) { // Enemy has mill
 			
 			if(placingPhase) {
-				
+
 				tempPanel = f[tX][tY];
 				tempPanel.setFigure(playerTwo[count / 2]);
-				playerOne[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+				playerTwo[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
 				tempPanel = null;
 				
 			} else {
@@ -942,7 +956,7 @@ public class GraphicsJPanel extends JPanel {
 			EndState tempState = (EndState) endState;
 			if(online) {
 				
-				if(tempState.getColor() != null && tempState.getColor() || endID == 4) {
+				if((tempState.getColor() != null && tempState.getColor()) && endID != 5 || endID == 4) {
 					if(color) {
 							
 						game.getWindow().getLabel().setText("Black (YOU) wins!");
@@ -951,12 +965,6 @@ public class GraphicsJPanel extends JPanel {
 
 						game.getWindow().getLabel().setText("Black (NMY) wins!");
 							
-					}
-					
-					if(endID != 4) {
-						
-						//sendOnlineData(4, "", "");
-						
 					}
 					
 				} else if(endID == 3) {
@@ -970,6 +978,10 @@ public class GraphicsJPanel extends JPanel {
 						game.getWindow().getLabel().setText("White (NMY) wins!");
 						
 					}
+					
+				} else if(endID == 5) {
+					
+					game.getWindow().getLabel().setText("NMY left the game.");
 					
 				}
 				
@@ -1032,7 +1044,7 @@ public class GraphicsJPanel extends JPanel {
 		
 		m.getFigure().delete();
 		m.delFigure();
-		count++;
+		//count++;
 		return true;
 	}
 

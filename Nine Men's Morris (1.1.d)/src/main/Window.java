@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -103,7 +104,7 @@ public class Window extends JFrame{
 		frame.setSize(WIDTH, HEIGHT);
 		frame.addKeyListener(game.getKeyboardManager());
 		frame.setResizable(false);
-		frame.setDefaultCloseOperation(saveClose());
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setFocusable(false);
 		frame.setLayout(new GridBagLayout());
@@ -293,6 +294,7 @@ public class Window extends JFrame{
 				}
 				if(e.getSource() == closeButton) {
 					if(wasOnline) {
+						oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
 						oMan.endConnection();
 					}
 					System.exit(0);
@@ -322,6 +324,10 @@ public class Window extends JFrame{
 							
 						}
 						
+					} else {
+						
+						oMan.sendData(new DataPackage(98, 0, 0, 0, 0));
+						
 					}
 					
 				}
@@ -336,9 +342,20 @@ public class Window extends JFrame{
 				}
 				if(e.getSource() == exitButton) {
 					//TODO
-					//Exit Options
-					inetAddress = game.getOptionsState().getTFContent();
-					State.setCurrentState(game.getMenuState());
+					//Exit Options / Online Game
+					if(State.getCurrentState() != game.getOptionsState()) {
+						
+						oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
+						oMan.endConnection();
+						isOnline = false;
+						getLabel().setText("YOU left the game.");
+						State.setCurrentState(game.getMenuState());
+						
+					} else {
+						
+						State.setCurrentState(game.getMenuState());
+						
+					}
 					//System.out.println(inetAddress);
 					
 				}
@@ -431,13 +448,6 @@ public class Window extends JFrame{
 		
 		frame.setVisible(true);
 		frame.pack();
-	}
-	
-	private int saveClose() {
-		if(isOnline) {
-			oMan.endConnection();
-		}
-		return 3;
 	}
 
 	public void tick() {
