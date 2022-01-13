@@ -660,6 +660,7 @@ public class GraphicsJPanel extends JPanel {
 			
 		}
 		
+		//System.out.println("Count: " + count + "\tStatus: " + dp.getStatus());
 		int s = dp.getStatus();
 		
 		if(s < 6) { // General game moves received from enemy
