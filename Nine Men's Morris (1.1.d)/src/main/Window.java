@@ -9,8 +9,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -22,6 +20,7 @@ import main.graphics.GraphicsLoader;
 import main.graphics.MyJPanel;
 import main.online.DataPackage;
 import main.online.OnlineManager;
+import main.states.EndState;
 import main.states.State;
 
 public class Window extends JFrame{
@@ -264,13 +263,13 @@ public class Window extends JFrame{
 		
 		
 		messagePanel.setFocusable(false);
-		messagePanel.setBounds(335, 7, 330, 37);
+		messagePanel.setBounds(325, 7, 350, 37);
 		messagePanel.setOpaque(true);
 		messagePanel.setBackground(GREENISH);
 		
 		
 		label.setFocusable(false);
-		label.setBounds(5, 10, 310, 50);
+		label.setBounds(5, 10, 330, 50);
 		label.setForeground(Color.white);
 		label.setFont(chalk.deriveFont(22f));
 		label.setText(TITLE);
@@ -301,32 +300,34 @@ public class Window extends JFrame{
 				}
 				if(e.getSource() == joinButton) {
 					
-					if(!isOnline) {
+					if(isOnline) {
+
+						oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
+						oMan.endConnection();
 						
-						oMan = new OnlineManager(game);
-						if(oMan.getIfActive()) {
-
-							DataPackage dp = oMan.receiveData();
+					}
+					oMan = new OnlineManager(game);
+					if(oMan.getIfActive()) {
+						DataPackage dp = null;
+						while(dp == null) {
 							
-							if(dp.getStatus() == 98) {
-								
-								setRunning(true);
-								isOnline = true;
-								wasOnline = true;
-								panel.setOnlineManager(oMan);
-								panel.setOnline(isOnline);
-
-								panel.setActiveUser(dp.getFromY() % 2 != 1);
-								//Starts a new game, online and which color the local player has
-								game.reset(isOnline, dp.getFromX() % 2 == 1);
-								
-							}
+							dp = oMan.receiveData();
 							
 						}
 						
-					} else {
-						
-						oMan.sendData(new DataPackage(98, 0, 0, 0, 0));
+						if(dp.getStatus() == 98) {
+							
+							setRunning(true);
+							isOnline = true;
+							wasOnline = true;
+							panel.setOnlineManager(oMan);
+							panel.setOnline(isOnline);
+
+							panel.setActiveUser(dp.getFromY() % 2 != 1);
+							//Starts a new game, online and which color the local player has
+							game.reset(isOnline, dp.getFromX() % 2 == 1);
+							
+						}
 						
 					}
 					
@@ -345,11 +346,12 @@ public class Window extends JFrame{
 					//Exit Options / Online Game
 					if(State.getCurrentState() != game.getOptionsState()) {
 						
-						oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
-						oMan.endConnection();
-						isOnline = false;
-						getLabel().setText("YOU left the game.");
-						State.setCurrentState(game.getMenuState());
+						if(wasOnline) {
+							oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
+							oMan.endConnection();
+						}
+						running = false;
+						State.setCurrentState(new EndState(game, false));
 						
 					} else {
 						

@@ -40,9 +40,10 @@ public class GraphicsJPanel extends JPanel {
 				count, 
 				playerOneFigureCount, 
 				playerTwoFigureCount,
-				endID;
+				endID = 6;
 	
 	private Random random;
+	private Thread receiver;
 	
 	private List<String> repetitiveField;
 	
@@ -153,10 +154,15 @@ public class GraphicsJPanel extends JPanel {
 				alreadyPressed = false;
 			}
 			
-			if(!activeUser) {
+			if(!receiver.isAlive()) {
 				
-				getOnlineData();
+				receiver = new Thread(() -> {
+					
+					getOnlineData();
+					
+				});
 				
+				receiver.start();
 			}
 			
 			if(!alreadyPressed) {
@@ -639,8 +645,6 @@ public class GraphicsJPanel extends JPanel {
 		else if(toY < 550) 		tY = 5;
 		else 					tY = 6;
 		
-		System.out.println("Send: " + 0 + " " + fX + " " + fY + " " + tX + " " + tY);
-		System.out.println("PC: " + playerOneFigureCount + " " + playerTwoFigureCount);
 		oMan.sendData(new DataPackage(0, fX, fY, tX, tY));
 		activeUser = false;
 		
@@ -655,8 +659,6 @@ public class GraphicsJPanel extends JPanel {
 			return;
 			
 		}
-		
-		System.out.println(dp.getStatus() + " " + dp.getFromX() + " " + dp.getFromY() + " " + dp.getToX() + " " + dp.getToY());
 		
 		int s = dp.getStatus();
 		
@@ -730,6 +732,10 @@ public class GraphicsJPanel extends JPanel {
 			
 		} else if(s == 23) { //YOU WIN
 			
+			if(placingPhase) {
+				count++;
+			}
+			drawBoardFromString(dp);
 			if(color) { //Black wins (YOU)
 				endID = 4;
 				endState = new EndState(game, true);
@@ -741,10 +747,13 @@ public class GraphicsJPanel extends JPanel {
 				State.setCurrentState(endState);
 				
 			}
-			drawBoardFromString(dp);
 			
 		} else if(s == 24) { //NMY WIN
-			
+
+			if(placingPhase) {
+				count++;
+			}
+			drawBoardFromString(dp);
 			if(!color) { //Black wins (NMY)
 				endID = 4;
 				endState = new EndState(game, true);
@@ -756,55 +765,23 @@ public class GraphicsJPanel extends JPanel {
 				State.setCurrentState(endState);
 				
 			}
-			drawBoardFromString(dp);
 			
 		} else if(s == 8) {
-			
+
+			drawBoardFromString(dp);
 			stalemateOnline = true;
 			endState = new EndState(game);
 			State.setCurrentState(endState);
-			drawBoardFromString(dp);
 			
 			
 		}
 		
-		
-		
-			
-		/*else if(dp.getStatus() <= 4) {
-
-			if(dp.getStatus() == 2) {
-				//Stalemate / Draw
-				endState = new EndState(game);
-				State.setCurrentState(endState);
-				
-			} else if(dp.getStatus() == 3) {
-				//White wins
-				endState = new EndState(game, false);
-				State.setCurrentState(endState);
-				
-			} else if(dp.getStatus() == 4) {
-				//Black wins
-				endState = new EndState(game, true);
-				State.setCurrentState(endState);
-				
-			}
-			
-			//TODO
-			//End Game Accordingly
-			endID = dp.getStatus();
-			activeUser = false;
-			
-		} */
-		
-		System.out.println("PC: " + playerOneFigureCount + " " + playerTwoFigureCount);
 		
 	}
 	
 	private void drawBoardFromString(DataPackage dp) {
 		
 		int s = dp.getStatus();
-		System.out.println("Count " + count);
 		MyJPanel[][] f = game.getWindow().getJPanel();
 		
 		int 	fX = dp.getFromX(), fY = dp.getFromY(),
@@ -820,7 +797,7 @@ public class GraphicsJPanel extends JPanel {
 			if(s != 0)
 				initMoving = true;
 			
-		} else if(s < 6 || s == 23 || s == 24 || s == 8) { //Any other phase, writing after win, lose or stalemate
+		} else if(s < 6) { //Any other phase, writing after win, lose or stalemate
 			
 			tempPanel = f[tX][tY];
 			tempPanel.setFigure(f[fX][fY].getFigure());
@@ -870,7 +847,45 @@ public class GraphicsJPanel extends JPanel {
 				
 			}
 			
+		} else if(s == 23 || s == 24 || s == 8) {
+			
+			if(!mill) {
+				
+				if(placingPhase) {
+					
+					tempPanel = f[tX][tY];
+					if(s == 23) {
+						
+						tempPanel.setFigure(playerOne[count / 2]);
+						playerOne[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+						
+					} else {
+						
+						tempPanel.setFigure(playerTwo[count / 2]);
+						playerTwo[count / 2].move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+						
+					}
+					tempPanel = null;
+					
+				} else {
+					
+					tempPanel = f[tX][tY];
+					tempPanel.setFigure(f[fX][fY].getFigure());
+					f[fX][fY].getFigure().move(f[tX][tY].getX() + 5, f[tX][tY].getY() + 5);
+					f[fX][fY].delFigure();
+					tempPanel = null;
+					
+				}
+				
+			} if(mill) {
+				
+				removeFigureOnline(f[tX][tY]);
+				
+			}
+			
 		}
+		
+		this.repaint();
 		
 		
 	}
@@ -956,14 +971,14 @@ public class GraphicsJPanel extends JPanel {
 			EndState tempState = (EndState) endState;
 			if(online) {
 				
-				if((tempState.getColor() != null && tempState.getColor()) && endID != 5 || endID == 4) {
+				if(endID == 4) {
 					if(color) {
 							
-						game.getWindow().getLabel().setText("Black (YOU) wins!");
+						game.getWindow().getLabel().setText("Black (YOU) wins! New Game?");
 							
 					} else {
 
-						game.getWindow().getLabel().setText("Black (NMY) wins!");
+						game.getWindow().getLabel().setText("Black (NMY) wins! New Game?");
 							
 					}
 					
@@ -971,17 +986,21 @@ public class GraphicsJPanel extends JPanel {
 					
 					if(!color) {
 						
-						game.getWindow().getLabel().setText("White (YOU) wins!");
+						game.getWindow().getLabel().setText("White (YOU) wins! New Game?");
 						
 					} else {
 
-						game.getWindow().getLabel().setText("White (NMY) wins!");
+						game.getWindow().getLabel().setText("White (NMY) wins! New Game?");
 						
 					}
 					
 				} else if(endID == 5) {
 					
 					game.getWindow().getLabel().setText("NMY left the game.");
+					
+				} else if(endID == 6) {
+					
+					game.getWindow().getLabel().setText("YOU left the game.");
 					
 				}
 				
@@ -1083,6 +1102,16 @@ public class GraphicsJPanel extends JPanel {
 		for(int i = 0; i < 9; i++) {
 			playerOne[i] = new Figure(this.color, this, 140, 50 + i * 70);
 			playerTwo[i] = new Figure(!this.color, this, 820, 50 + i * 70);
+		}
+		
+		if(online) {
+			
+			receiver = new Thread(() -> {
+				
+				getOnlineData();
+				
+			});
+			
 		}
 		
 	}

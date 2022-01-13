@@ -37,7 +37,7 @@ public class MenuState extends State {
 		exitButton = game.getWindow().getExitButton();
 		
 		panel = game.getWindow().getMessagePanel();
-		panel.setVisible(false);
+		panel.setVisible(true);
 		
 	}
 
@@ -56,7 +56,7 @@ public class MenuState extends State {
 		closeButton.setVisible(true);
 		//exitButton.setVisible(false);
 		
-		if(game.getWindow().getIfOnline()) {
+		if(game.getWindow().getIfOnline() && game.getWindow().isRunning()) {
 			exitButton.setVisible(true);
 			startButton.setVisible(false);
 		} else {

@@ -20,7 +20,8 @@ public class EndState extends State{
 					closeButton, 
 					optionButton, 
 					continueButton,
-					joinButton;
+					joinButton,
+					exitButton;
 	
 	private JPanel panel;
 	private JLabel label;
@@ -34,6 +35,7 @@ public class EndState extends State{
 		continueButton = game.getWindow().getContinueButton();
 		closeButton = game.getWindow().getCloseButton();
 		optionButton = game.getWindow().getOptionButton();
+		exitButton = game.getWindow().getExitButton();
 		joinButton = game.getWindow().getJoinButton();
 		panel = game.getWindow().getMessagePanel();
 		label = game.getWindow().getLabel();
@@ -67,8 +69,17 @@ public class EndState extends State{
 			label.setText("White wins!");
 		}*/
 		
-		startButton.setVisible(true);
-		startButton.setOpaque(false);
+		if(!(game.getWindow().getIfOnline() && game.getWindow().isRunning())) {
+			
+			startButton.setVisible(true);
+			startButton.setOpaque(false);
+			
+		} else {
+			
+			exitButton.setVisible(true);
+			exitButton.setOpaque(false);
+			
+		}
 		
 		continueButton.setVisible(true);
 		

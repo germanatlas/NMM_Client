@@ -23,16 +23,16 @@ public class Client {
 	
 	public Client(String address, int port) throws UnknownHostException, IOException {
 		
-		System.out.println("Starting Client...");
+		//System.out.println("Starting Client...");
 		client = new Socket(address, port);
-		System.out.println("Client Address:\t" + getPublicAddress());
-		System.out.println("Connected to Client:\t" + client.getInetAddress().getHostAddress());
+		//System.out.println("Client Address:\t" + getPublicAddress());
+		//System.out.println("Connected to Client:\t" + client.getInetAddress().getHostAddress());
 		
-		System.out.println("Creating Streams...");
+		//System.out.println("Creating Streams...");
 		in = new BufferedInputStream(client.getInputStream());
 		out = new BufferedOutputStream(client.getOutputStream());
 		isInitiated = true;
-		System.out.println("Finished creating Client.");
+		//System.out.println("Finished creating Client.");
 		
 	}
 	
@@ -43,7 +43,7 @@ public class Client {
 			try {
 				client.close();
 			} catch (IOException e) {
-				System.out.println("Server Stop Error\n" + e);
+				//System.out.println("Server Stop Error\n" + e);
 			}
 			
 		}
@@ -59,7 +59,7 @@ public class Client {
 				//idk, just many bytes as buffer
 				byte[] buffer = new byte[2048];
 				count = in.read(buffer);
-				System.out.println(count + " Bytes Received.");
+				//System.out.println(count + " Bytes Received.");
 				
 				byte[] pack = new byte[count];
 				pack = shorten(buffer, count);
@@ -67,7 +67,7 @@ public class Client {
 				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
-				System.out.println("Receiving Error:\n"); e.printStackTrace();
+				//System.out.println("Receiving Error:\n"); e.printStackTrace();
 				return null;
 			}
 		} else {
@@ -86,16 +86,16 @@ public class Client {
 				byte[] bytes = toBytes(data);
 				out.write(bytes);
 				out.flush();
-				System.out.println(bytes.length + " Bytes Sent.");
+				//System.out.println(bytes.length + " Bytes Sent.");
 			} catch (IOException e) {
-				System.out.println("Sending Error:\n" + e);
+				//System.out.println("Sending Error:\n" + e);
 			}
 		}
 		
 	}
 
 	//TODO Remove
-	public String getPublicAddress() throws IOException {
+	/*public String getPublicAddress() throws IOException {
 		
 		URL whatismyip = new URL("http://checkip.amazonaws.com");
 		BufferedReader in = new BufferedReader(new InputStreamReader(
@@ -104,7 +104,7 @@ public class Client {
 		String ip = in.readLine();
 		
 		return ip;
-	}
+	}*/
 
 	private byte[] toBytes(Object obj) throws IOException {
 		
