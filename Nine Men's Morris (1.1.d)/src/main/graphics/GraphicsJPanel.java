@@ -12,8 +12,8 @@ import javax.swing.JPanel;
 
 import main.game.Game;
 import main.movment.Figure;
-import main.online.DataPackage;
 import main.online.OnlineManager;
+import main.online.packs.DataPackage;
 import main.states.EndState;
 import main.states.GameState;
 import main.states.MenuState;
@@ -652,7 +652,7 @@ public class GraphicsJPanel extends JPanel {
 	
 	private void getOnlineData() {//TODO
 		
-		DataPackage dp = oMan.receiveData();
+		DataPackage dp = (DataPackage) oMan.receiveData();
 		
 		if(dp == null) {
 			

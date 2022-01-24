@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import main.game.Game;
 import main.graphics.GraphicsJPanel;
@@ -26,6 +27,10 @@ public class GameState extends State{
 					continueButton,
 					exitbButton;
 	
+	private JTextField	inetTF,
+						uNameTF,
+						passTF;
+	
 	private JPanel panel;
 	
 	private boolean	escapePressed;
@@ -41,7 +46,9 @@ public class GameState extends State{
 		this.optionButton = game.getWindow().getOptionButton();
 		this.exitbButton = game.getWindow().getExitButton();
 		
-		
+		inetTF = game.getWindow().getinetTF();
+		uNameTF = game.getWindow().getUNameTF();
+		passTF = game.getWindow().getPassTF();
 		
 		this.panel = game.getWindow().getMessagePanel();
 		
@@ -81,6 +88,10 @@ public class GameState extends State{
 		this.exitbButton.setVisible(false);
 
 		panel.setVisible(true);
+		
+		inetTF.setVisible(false);
+		uNameTF.setVisible(false);
+		passTF.setVisible(false);
 		
 	}
 

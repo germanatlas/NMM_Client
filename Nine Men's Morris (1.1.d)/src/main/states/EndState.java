@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import main.game.Game;
 
@@ -23,6 +24,10 @@ public class EndState extends State{
 					joinButton,
 					exitButton;
 	
+	private JTextField	inetTF,
+						uNameTF,
+						passTF;
+	
 	private JPanel panel;
 	private JLabel label;
 	
@@ -37,6 +42,11 @@ public class EndState extends State{
 		optionButton = game.getWindow().getOptionButton();
 		exitButton = game.getWindow().getExitButton();
 		joinButton = game.getWindow().getJoinButton();
+
+		inetTF = game.getWindow().getinetTF();
+		uNameTF = game.getWindow().getUNameTF();
+		passTF = game.getWindow().getPassTF();
+		
 		panel = game.getWindow().getMessagePanel();
 		label = game.getWindow().getLabel();
 		
@@ -91,6 +101,10 @@ public class EndState extends State{
 		
 		optionButton.setVisible(true);
 		optionButton.setOpaque(false);
+		
+		inetTF.setVisible(false);
+		uNameTF.setVisible(false);
+		passTF.setVisible(false);
 	
 	}
 	

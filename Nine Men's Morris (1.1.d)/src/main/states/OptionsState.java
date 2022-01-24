@@ -3,6 +3,7 @@ package main.states;
 import java.awt.Graphics;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -11,17 +12,32 @@ import main.game.Game;
 public class OptionsState extends State {
 
 	
-	private JPanel 	panel,
-					optionsPanel;
+	/*
+	 * TODO
+	 * -----
+	 * |	IP
+	 * |	LOGIN / REGISTRATION
+	 * ----- Deactivated when connected
+	 * 
+	 * Different Designs?
+	 * 
+	 * 
+	 */
+	
+	private JPanel 	panel;
 	
 	private JButton startButton, 
 					continueButton, 
 					optionButton, 
 					closeButton,
 					joinButton,
-					exitButton;
+					exitButton,
+					loginButton,
+					registerButton;
 	
-	private JTextField addrTF;
+	private JTextField	inetTF,
+						uNameTF,
+						passTF;
 
 	private boolean escapePressed;
 	
@@ -34,8 +50,12 @@ public class OptionsState extends State {
 		optionButton = game.getWindow().getOptionButton();
 		closeButton = game.getWindow().getCloseButton();
 		exitButton = game.getWindow().getExitButton();
+		loginButton = game.getWindow().getLoginButtton();
+		registerButton = game.getWindow().getRegisterButton();
 		
-		addrTF = new JTextField();
+		inetTF = game.getWindow().getinetTF();
+		uNameTF = game.getWindow().getUNameTF();
+		passTF = game.getWindow().getPassTF();
 		
 		panel = game.getWindow().getMessagePanel();
 		panel.setVisible(false);
@@ -49,7 +69,6 @@ public class OptionsState extends State {
 		}
 		if(escapePressed && !game.getKeyboardManager().isEscapePressed()) {
 			escapePressed = false;
-			game.getWindow().setAddress(getTFContent());
 			State.setCurrentState(game.getMenuState());
 		}
 		
@@ -67,11 +86,15 @@ public class OptionsState extends State {
 		closeButton.setVisible(false);
 		exitButton.setVisible(true);
 		
-	}
-	
-	public String getTFContent() {
-		
-		return addrTF.getText();
+		if(!game.getWindow().getIfOnline() && !game.getWindow().isRunning()) {
+			
+			inetTF.setVisible(true);
+			uNameTF.setVisible(true);
+			passTF.setVisible(true);
+			loginButton.setVisible(true);
+			registerButton.setVisible(true);
+			
+		}
 		
 	}
 

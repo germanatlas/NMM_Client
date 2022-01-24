@@ -3,6 +3,7 @@ package main.online;
 import java.io.IOException;
 
 import main.game.Game;
+import main.online.packs.DataPackage;
 
 public class OnlineManager {
 	
@@ -45,7 +46,7 @@ public class OnlineManager {
 		
 	}
 	
-	public void sendData(DataPackage data) {
+	public void sendData(Object data) {
 		
 		if(activeClient) {
 			
@@ -55,11 +56,11 @@ public class OnlineManager {
 		
 	}
 	
-	public DataPackage receiveData() {
+	public Object receiveData() {
 		
 		if(activeClient) {
 			
-			return (DataPackage) client.receiveData();
+			return client.receiveData();
 			
 		}
 		
