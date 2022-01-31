@@ -27,8 +27,7 @@ public class GameState extends State{
 					continueButton,
 					exitbButton;
 	
-	private JTextField	inetTF,
-						uNameTF,
+	private JTextField	uNameTF,
 						passTF;
 	
 	private JPanel panel;
@@ -46,7 +45,6 @@ public class GameState extends State{
 		this.optionButton = game.getWindow().getOptionButton();
 		this.exitbButton = game.getWindow().getExitButton();
 		
-		inetTF = game.getWindow().getinetTF();
 		uNameTF = game.getWindow().getUNameTF();
 		passTF = game.getWindow().getPassTF();
 		
@@ -89,7 +87,6 @@ public class GameState extends State{
 
 		panel.setVisible(true);
 		
-		inetTF.setVisible(false);
 		uNameTF.setVisible(false);
 		passTF.setVisible(false);
 		

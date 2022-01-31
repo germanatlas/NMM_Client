@@ -35,8 +35,7 @@ public class OptionsState extends State {
 					loginButton,
 					registerButton;
 	
-	private JTextField	inetTF,
-						uNameTF,
+	private JTextField	uNameTF,
 						passTF;
 
 	private boolean escapePressed;
@@ -53,7 +52,6 @@ public class OptionsState extends State {
 		loginButton = game.getWindow().getLoginButtton();
 		registerButton = game.getWindow().getRegisterButton();
 		
-		inetTF = game.getWindow().getinetTF();
 		uNameTF = game.getWindow().getUNameTF();
 		passTF = game.getWindow().getPassTF();
 		
@@ -88,7 +86,6 @@ public class OptionsState extends State {
 		
 		if(!game.getWindow().getIfOnline() && !game.getWindow().isRunning()) {
 			
-			inetTF.setVisible(true);
 			uNameTF.setVisible(true);
 			passTF.setVisible(true);
 			loginButton.setVisible(true);

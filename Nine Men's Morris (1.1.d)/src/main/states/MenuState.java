@@ -29,8 +29,7 @@ public class MenuState extends State {
 					loginButton,
 					registerButton;
 	
-	private JTextField	inetTF,
-						uNameTF,
+	private JTextField	uNameTF,
 						passTF;
 	
 	public MenuState(Game game) {
@@ -46,7 +45,6 @@ public class MenuState extends State {
 		loginButton = game.getWindow().getLoginButtton();
 		registerButton = game.getWindow().getRegisterButton();
 
-		inetTF = game.getWindow().getinetTF();
 		uNameTF = game.getWindow().getUNameTF();
 		passTF = game.getWindow().getPassTF();
 		
@@ -66,9 +64,14 @@ public class MenuState extends State {
 		
 		continueButton.setVisible(true);
 		joinButton.setVisible(true);
-		optionButton.setVisible(true);
 		closeButton.setVisible(true);
 		//exitButton.setVisible(false);
+		
+		if(!game.getWindow().getIfOnline()) {
+			
+			optionButton.setVisible(true);
+			
+		}
 		
 		if(game.getWindow().getIfOnline() && game.getWindow().isRunning()) {
 			exitButton.setVisible(true);
@@ -78,11 +81,11 @@ public class MenuState extends State {
 			startButton.setVisible(true);
 		}
 		
-		inetTF.setVisible(false);
 		uNameTF.setVisible(false);
 		passTF.setVisible(false);
 		loginButton.setVisible(false);
 		registerButton.setVisible(false);
+		panel.setVisible(true);
 	
 	}
 	

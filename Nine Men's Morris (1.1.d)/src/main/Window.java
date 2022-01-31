@@ -12,17 +12,15 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.IOException;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.JToolTip;
-
 import main.game.Game;
 import main.graphics.GraphicsJPanel;
 import main.graphics.GraphicsLoader;
+import main.graphics.LobbyPanel;
 import main.graphics.MyJPanel;
 import main.online.OnlineManager;
 import main.online.packs.DataPackage;
@@ -34,7 +32,8 @@ public class Window extends JFrame{
 	
 	private static final long serialVersionUID = 1L;
 	
-	private JFrame frame;
+	private JFrame	frame,
+					enemySelection;
 	
 	private JButton startButton, 
 					optionButton, 
@@ -45,8 +44,7 @@ public class Window extends JFrame{
 					loginButton,
 					registerButton;
 	
-	private JTextField 	inetTF,
-						uNameTF;
+	private JTextField 	uNameTF;
 	private JPasswordField passTF;
 	
 	private JLabel label;
@@ -56,6 +54,7 @@ public class Window extends JFrame{
 	private Game game;
 	private JPanel	messagePanel;
 	private OnlineManager oMan;
+	private LobbyPanel lobby;
 	
 	private boolean running,
 					activeClient,
@@ -65,7 +64,8 @@ public class Window extends JFrame{
 					rdytologin;
 	
 	private Font chalk;
-	private final Color GREENISH = new Color(53, 104, 45);
+	private final Color	GREENISH = new Color(53, 104, 45),
+						REDDISH = new Color(156, 16, 6);
 	
 	private final int WIDTH = 1000, 
 					  HEIGHT = 700, 
@@ -75,8 +75,7 @@ public class Window extends JFrame{
 	private final String TITLE = "Nine Men's Morris";
 	private final GridBagConstraints STANDARDCONSTRAINTS = new GridBagConstraints();
 
-	private String	inetAddress,
-					username;
+	private String username;
 	
 	private int password;
 
@@ -100,15 +99,16 @@ public class Window extends JFrame{
 	private void createWindow() {
 		running = false;
 		
-		inetAddress = "";
 		username = "";
 		password = 0;
 		activeClient = false;
 		rdytologin = false;
 		
 		frame = new JFrame(TITLE);
+		enemySelection = new JFrame("Players Online");
 		
 		panel = new GraphicsJPanel(game, WIDTH, HEIGHT);
+		lobby = new LobbyPanel(game);
 		jPanel = new MyJPanel[7][7];
 		messagePanel = new JPanel();
 		
@@ -123,7 +123,6 @@ public class Window extends JFrame{
 		loginButton = new JButton();
 		registerButton = new JButton();
 		
-		inetTF = new JTextField();
 		uNameTF = new JTextField();
 		passTF = new JPasswordField();
 		
@@ -135,6 +134,15 @@ public class Window extends JFrame{
 		frame.setFocusable(false);
 		frame.setLayout(new GridBagLayout());
 		frame.setIconImage(graphicsLoader.loadImage("/textures/figure_brown.png"));
+		
+		enemySelection.setSize(WIDTH, HEIGHT);
+		enemySelection.addKeyListener(game.getKeyboardManager());
+		enemySelection.setResizable(false);
+		enemySelection.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		enemySelection.setLocationRelativeTo(frame);
+		enemySelection.setFocusable(false);
+		enemySelection.setLayout(new GridBagLayout());
+		enemySelection.setIconImage(graphicsLoader.loadImage("/textures/figure_brown.png"));
 		
 		panel.setFocusable(true);
 		panel.setLayout(null);
@@ -303,6 +311,7 @@ public class Window extends JFrame{
 		
 		ActionListener buttonManager = new ActionListener() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
@@ -319,7 +328,7 @@ public class Window extends JFrame{
 				}
 				if(e.getSource() == closeButton) {
 					if(wasOnline) {
-						oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
+						oMan.sendData(new DataPackage(99, 0, 0, 0, 0)); //TODO
 						oMan.endConnection();
 					}
 					System.exit(0);
@@ -330,14 +339,62 @@ public class Window extends JFrame{
 						
 						if(isOnline) {
 
-							oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
-							oMan.endConnection();
+							return;
 							
 						}
 						oMan = new OnlineManager(game);
 						oMan.sendData(new LoginPackage(username, password, loginreg?0:1));
 						if(oMan.getIfActive()) {
-							DataPackage dp = null;
+							LoginPackage lp = null;
+							
+							while((lp = (LoginPackage) oMan.receiveData()) == null);
+							if(lp.getIfNewAccount() == 2) {
+								
+								//TODO frame für gegnersuche
+								isOnline = true;
+								wasOnline = true;
+								lobby.setOnlineManager(oMan);
+								enemySelection.setVisible(true);
+								optionButton.setEnabled(false);
+								lobby.run();
+								
+							}
+							
+							else {
+								
+								if(lp.getIfNewAccount() == 3) {
+
+									label.setText("This account already exists.");
+									
+								} else if(lp.getIfNewAccount() == 4) {
+									
+									label.setText("Unknown Username");
+									
+								} else if(lp.getIfNewAccount() == 5) {
+									
+									label.setText("Wrong Password");
+									
+								} else if(lp.getIfNewAccount() == 6) {
+									
+									label.setText("Username too long");
+									
+								}else if(lp.getIfNewAccount() == 7) {
+									
+									label.setText("Username too short");
+									
+								}else if(lp.getIfNewAccount() == 8) {
+									
+									label.setText("Illegal Username");
+									
+								} else if(lp.getIfNewAccount() == 9) {
+									
+									label.setText("User already Online");
+									
+								}
+								
+								oMan.endConnection();
+								
+							}
 							/*while(dp == null) {
 								
 								dp = (DataPackage) oMan.receiveData();
@@ -364,21 +421,16 @@ public class Window extends JFrame{
 					
 				}
 				if(e.getSource() == optionButton) {
-					//TODO
-					//Open Options
+					
 					State.setCurrentState(game.getOptionsState());
-						//TODO
-							//IP
-						//Later
-							//Username
+					
 				}
 				if(e.getSource() == exitButton) {
-					//TODO
-					//Exit Options / Online Game
+					
 					if(State.getCurrentState() != game.getOptionsState()) {
 						
 						if(wasOnline) {
-							oMan.sendData(new DataPackage(99, 0, 0, 0, 0));
+							oMan.sendData(new DataPackage(99, 0, 0, 0, 0)); //TODO
 							oMan.endConnection();
 						}
 						running = false;
@@ -388,21 +440,30 @@ public class Window extends JFrame{
 						
 						username = uNameTF.getText();
 						password = passTF.getText().hashCode();
-						System.out.println(password);
-						inetAddress = inetTF.getText();
 						State.setCurrentState(game.getMenuState());
+						
+						if(passTF.getText().split("").length < 5 || passTF.getText().equalsIgnoreCase("Password") || uNameTF.getText().equalsIgnoreCase("Username") || uNameTF.getText().equals("")) {
+							rdytologin = false;
+						} else {
+							rdytologin = true;
+						}
+						
 						
 					}
 					
 				}
 				if(e.getSource() == loginButton) {
 					
+					loginButton.setBackground(GREENISH);
+					registerButton.setBackground(REDDISH);
 					loginreg = true;
 					rdytologin = true;
 					
 				}
 				if(e.getSource() == registerButton) {
-					
+
+					loginButton.setBackground(REDDISH);
+					registerButton.setBackground(GREENISH);
 					loginreg = false;
 					rdytologin = true;
 					
@@ -413,34 +474,26 @@ public class Window extends JFrame{
 		
 		FocusListener textfieldListener = new FocusListener() {
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void focusGained(FocusEvent e) {
 				
 				if(e.getSource() == uNameTF) {
 					
-					System.out.println(uNameTF.getText());
 					if(uNameTF.getText().equals("Username")) {
 						
 						uNameTF.setText("");
+						uNameTF.setBackground(GREENISH);
 						
 					}
 					
 				} else if(e.getSource() == passTF) {
 
-					System.out.println(passTF.getText());
 					if(passTF.getText().equals("Password")) {
 						passTF.setEchoChar('*');
 						passTF.setText("");
+						passTF.setBackground(GREENISH);
 						
-						
-					}
-					
-				} else if(e.getSource() == inetTF) {
-
-					System.out.println(inetTF.getText());
-					if(inetTF.getText().equals("Server IP")) {
-						
-						inetTF.setText("");
 						
 					}
 					
@@ -448,6 +501,7 @@ public class Window extends JFrame{
 				
 			}
 
+			@SuppressWarnings("deprecation")
 			@Override
 			public void focusLost(FocusEvent e) {
 				if(e.getSource() == uNameTF) {
@@ -455,6 +509,12 @@ public class Window extends JFrame{
 					if(uNameTF.getText().isEmpty()) {
 						
 						uNameTF.setText("Username");
+						uNameTF.setBackground(REDDISH);
+						
+					} else if(uNameTF.getText().equalsIgnoreCase("Username")) {
+
+						uNameTF.setText("Username");
+						uNameTF.setBackground(REDDISH);
 						
 					}
 					
@@ -464,16 +524,13 @@ public class Window extends JFrame{
 						
 						passTF.setText("Password");
 						passTF.setEchoChar((char) 0);
-						//TODO show text
+						passTF.setBackground(REDDISH);
 						
-						
-					}
-					
-				} else if(e.getSource() == inetTF) {
-					
-					if(inetTF.getText().isEmpty()) {
-						
-						inetTF.setText("Server IP");
+					} else if(passTF.getText().equalsIgnoreCase("Password")) {
+
+						passTF.setText("Password");
+						passTF.setEchoChar((char) 0);
+						passTF.setBackground(REDDISH);
 						
 					}
 					
@@ -550,7 +607,7 @@ public class Window extends JFrame{
 		loginButton.setBounds(610, 90, 150, 70);
 		loginButton.setFocusable(true);
 		loginButton.addActionListener(buttonManager);
-		loginButton.setBackground(GREENISH);
+		loginButton.setBackground(REDDISH);
 		loginButton.setForeground(Color.white);
 		loginButton.setOpaque(true);
 		loginButton.setFont(chalk.deriveFont(22f));
@@ -560,7 +617,7 @@ public class Window extends JFrame{
 		registerButton.setBounds(610, 170, 150, 70);
 		registerButton.setFocusable(true);
 		registerButton.addActionListener(buttonManager);
-		registerButton.setBackground(GREENISH);
+		registerButton.setBackground(REDDISH);
 		registerButton.setForeground(Color.white);
 		registerButton.setOpaque(true);
 		registerButton.setFont(chalk.deriveFont(22f));
@@ -571,7 +628,7 @@ public class Window extends JFrame{
 		uNameTF.setLocation(240, 90);
 		uNameTF.setFocusable(true);
 		uNameTF.setVisible(true);
-		uNameTF.setBackground(GREENISH);
+		uNameTF.setBackground(REDDISH);
 		uNameTF.setForeground(Color.white);
 		uNameTF.setFont(chalk.deriveFont(22f));
 		uNameTF.setText("Username");
@@ -582,25 +639,14 @@ public class Window extends JFrame{
 		passTF.setFocusable(true);
 		passTF.setVisible(true);
 		passTF.setEchoChar((char) 0);
-		passTF.setBackground(GREENISH);
+		passTF.setBackground(REDDISH);
 		passTF.setForeground(Color.white);
 		passTF.setFont(chalk.deriveFont(22f));
 		passTF.setText("Password");
 		passTF.addFocusListener(textfieldListener);
 		
-		inetTF.setSize(350, 70);
-		inetTF.setLocation(240, 250);
-		inetTF.setFocusable(true);
-		inetTF.setVisible(true);
-		inetTF.setBackground(GREENISH);
-		inetTF.setForeground(Color.white);
-		inetTF.setFont(chalk.deriveFont(22f));
-		inetTF.setText("Server IP");
-		inetTF.addFocusListener(textfieldListener);
-		
 		panel.add(uNameTF);
 		panel.add(passTF);
-		panel.add(inetTF);
 		panel.add(loginButton);
 		panel.add(registerButton);
 		messagePanel.add(label);
@@ -611,6 +657,9 @@ public class Window extends JFrame{
 					panel.add(jPanel[i][j]);
 			}
 		}
+		
+		enemySelection.add(lobby);
+		enemySelection.pack();
 		
 
 		panel.add(messagePanel);
@@ -628,12 +677,18 @@ public class Window extends JFrame{
 
 	public void tick() {
 		
-		if(running) {
-			continueButton.setEnabled(true);
+		continueButton.setEnabled(running);
+		
+		optionButton.setEnabled(!isOnline);
+		startButton.setEnabled(!isOnline);
+		
+		if(lobby.getLobbyStatus()) {
+			lobby.tick();
+		} else {
+			enemySelection.setVisible(false);
 		}
-		else {
-			continueButton.setEnabled(false);
-		}	
+		
+		
 	}
 	
 	public JFrame getFrame() {
@@ -694,14 +749,6 @@ public class Window extends JFrame{
 	
 	public OnlineManager getOnlineManager() {
 		return oMan;
-	}
-
-	public void setAddress(String address) {
-		this.inetAddress = address;
-	}
-	
-	public String getAddress() {
-		return this.inetAddress;
 	}
 	
 //Max
@@ -766,10 +813,6 @@ public class Window extends JFrame{
 	public JTextField getPassTF() {
 		return passTF;
 	}
-	
-	public JTextField getinetTF() {
-		return inetTF;
-	}
 
 	public boolean getIfOnline() {
 		return isOnline;
@@ -789,6 +832,10 @@ public class Window extends JFrame{
 	
 	public JButton getRegisterButton() {
 		return registerButton;
+	}
+	
+	public String getUsername() {
+		return username;
 	}
 	
 }

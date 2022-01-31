@@ -24,7 +24,6 @@ public class OnlineManager {
 			
 			new Thread(() -> {
 				
-				
 				while(true) {
 					
 					if(activeClient) {

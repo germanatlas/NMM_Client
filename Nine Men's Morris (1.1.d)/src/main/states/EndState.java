@@ -24,8 +24,7 @@ public class EndState extends State{
 					joinButton,
 					exitButton;
 	
-	private JTextField	inetTF,
-						uNameTF,
+	private JTextField	uNameTF,
 						passTF;
 	
 	private JPanel panel;
@@ -43,7 +42,6 @@ public class EndState extends State{
 		exitButton = game.getWindow().getExitButton();
 		joinButton = game.getWindow().getJoinButton();
 
-		inetTF = game.getWindow().getinetTF();
 		uNameTF = game.getWindow().getUNameTF();
 		passTF = game.getWindow().getPassTF();
 		
@@ -102,7 +100,6 @@ public class EndState extends State{
 		optionButton.setVisible(true);
 		optionButton.setOpaque(false);
 		
-		inetTF.setVisible(false);
 		uNameTF.setVisible(false);
 		passTF.setVisible(false);
 	
