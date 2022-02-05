@@ -32,6 +32,8 @@ public class EndState extends State{
 	
 	private Boolean color;
 	
+	private final int id = 5;
+	
 	public EndState(Game game) {
 		super(game);
 		
@@ -107,6 +109,10 @@ public class EndState extends State{
 	
 	public Boolean getColor(){
 		return this.color;
+	}
+	
+	public int getID() {
+		return this.id;
 	}
 
 }

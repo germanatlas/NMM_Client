@@ -1079,6 +1079,8 @@ public class GraphicsJPanel extends JPanel {
 	//resets the graphics to play a new game
 	
 	public void reset(boolean color) {
+		
+		System.out.println("New Game");
 		this.repetition = 0;
 		this.repetitiveField = new ArrayList<String>();
 		this.roundsWithoutMill = 0;

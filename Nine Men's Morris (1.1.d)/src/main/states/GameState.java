@@ -34,6 +34,8 @@ public class GameState extends State{
 	
 	private boolean	escapePressed;
 	
+	private final int id = 2;
+	
 	public GameState(Game game) {
 		super(game);
 		
@@ -90,6 +92,10 @@ public class GameState extends State{
 		uNameTF.setVisible(false);
 		passTF.setVisible(false);
 		
+	}
+	
+	public int getID() {
+		return this.id;
 	}
 
 }

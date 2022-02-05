@@ -17,8 +17,11 @@ public abstract class State {
 	
 	protected Game game;
 	
+	private static int id;
+	
 	public static void setCurrentState(State state) {
 		currentState = state;
+		id = state.getID();
 	}
 	
 	public static State getCurrentState() {
@@ -32,5 +35,7 @@ public abstract class State {
 	public abstract void tick();
 	
 	public abstract void render(Graphics g);
+	
+	public abstract int getID();
 
 }

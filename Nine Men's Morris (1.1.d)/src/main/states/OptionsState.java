@@ -40,6 +40,8 @@ public class OptionsState extends State {
 
 	private boolean escapePressed;
 	
+	private final int id = 3;
+	
 	public OptionsState(Game game) {
 		super(game);
 	
@@ -93,6 +95,10 @@ public class OptionsState extends State {
 			
 		}
 		
+	}
+	
+	public int getID() {
+		return this.id;
 	}
 
 }

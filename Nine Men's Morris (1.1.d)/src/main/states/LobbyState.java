@@ -10,6 +10,8 @@ public class LobbyState extends State{
 
 	private JButton[] enemy;
 	
+	private final int id = 4;
+	
 	public LobbyState(Game game) {
 		super(game);
 		
@@ -27,6 +29,10 @@ public class LobbyState extends State{
 	public void render(Graphics g) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public int getID() {
+		return this.id;
 	}
 
 }

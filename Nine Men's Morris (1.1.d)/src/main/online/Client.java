@@ -65,6 +65,8 @@ public class Client {
 				pack = shorten(buffer, count);
 				Object obj = toObject(pack);
 				
+				System.out.println(obj.getClass().toString());
+				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
 				//System.out.println("Receiving Error:\n"); e.printStackTrace();

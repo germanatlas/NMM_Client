@@ -32,6 +32,8 @@ public class MenuState extends State {
 	private JTextField	uNameTF,
 						passTF;
 	
+	private final int id = 1;
+	
 	public MenuState(Game game) {
 		super(game);
 		
@@ -87,6 +89,10 @@ public class MenuState extends State {
 		registerButton.setVisible(false);
 		panel.setVisible(true);
 	
+	}
+	
+	public int getID() {
+		return this.id;
 	}
 	
 
