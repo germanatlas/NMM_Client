@@ -7,8 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.awt.Font;
 import java.awt.FontFormatException;
@@ -31,6 +29,7 @@ public class LobbyPanel extends JPanel {
 	private Game game;
 	private GraphicsLoader graphicsLoader = new GraphicsLoader();
 	private OnlineManager oMan;
+	private LobbyPackage lastPack;
 	
 	private final int WIDTH = 1000, 
 					  HEIGHT = 700,
@@ -100,14 +99,62 @@ public class LobbyPanel extends JPanel {
 				} else if(lp.getStatus() == 1) { //ACCEPT
 					
 					inLobby = false;
+					lastPack = new LobbyPackage(lp.getUser(), 100);
+					oMan.sendData(lastPack);
 
 					DataPackage dp = null;
 					while((dp = (DataPackage) oMan.receiveData()) == null);
 					newGame(dp);
 					
+				} else if(lp.getStatus() == 3) { //UPDATE LIST
+
+					setEachElementFalse();
+					
+					for(int i = 0; !enemy[i].getText().isEmpty(); i++) {
+						
+						enemy[i].setText("");
+						enemy[i].setForeground(Color.white);
+						enemy[i].setVisible(false);
+						
+					}
+					
+					for(int i = 0, b = 0; i < MAXUSERS_ON_SERVER && i < lp.getUser().length; i++, b++) {
+						
+						if(lp.getUser()[i].equals(game.getWindow().getUsername())) {
+							b--;
+							continue;
+						}
+						
+						enemy[b].setText(lp.getUser()[i]);
+						
+						if(challengers.get(lp.getUser()[i]) != null) {
+							enemy[b].setForeground(YELLOW);
+							challengers.replace(lp.getUser()[i], true);
+						}
+						
+						removeChallengers();
+						
+						enemy[b].setVisible(true);
+						
+					}
+					
+					
+				} else if(lp.getStatus() == 5) { //INITIAL BULK OF PLAYERS AFTER LOGIN OR GAME
+					
+					for(int i = 0; i < MAXUSERS_ON_SERVER && i < lp.getUser().length; i++) {
+						
+						enemy[i].setText(lp.getUser()[i]);
+						enemy[i].setForeground(Color.white);
+						enemy[i].setVisible(true);
+						//System.out.println("Reset");
+						
+					}
+					
+				} else if(lp.getStatus() == 7) { //RESEND REQUEST
+
+					oMan.sendData(lastPack);
+					
 				}
-				
-				setUser(lp);
 				
 				
 			}
@@ -139,7 +186,7 @@ public class LobbyPanel extends JPanel {
 			enemy[i].setOpaque(false);
 			enemy[i].setFont(chalk.deriveFont(22f));
 			enemy[i].setFocusPainted(false);
-			enemy[i].setVisible(true);
+			enemy[i].setVisible(false);
 			enemy[i].setText("");
 			
 			this.add(enemy[i]);
@@ -167,59 +214,6 @@ public class LobbyPanel extends JPanel {
 		}
 		
 		return null;
-	}
-	
-	private void setUser(LobbyPackage lp) {
-		
-		JButton tmp;
-		//System.out.println("setUser");
-		
-		if(lp.getStatus() == 3) { //UPDATE LIST
-
-			setEachElementFalse();
-			
-			for(int i = 0; !enemy[i].getText().isEmpty(); i++) {
-				
-				enemy[i].setText("");
-				enemy[i].setForeground(Color.white);
-				enemy[i].setVisible(false);
-				
-			}
-			
-			for(int i = 0, b = 0; i < MAXUSERS_ON_SERVER && i < lp.getUser().length; i++, b++) {
-				
-				if(lp.getUser()[i].equals(game.getWindow().getUsername())) {
-					b--;
-					continue;
-				}
-				
-				enemy[b].setText(lp.getUser()[i]);
-				
-				if(challengers.get(lp.getUser()[i]) != null) {
-					enemy[b].setForeground(YELLOW);
-					challengers.replace(lp.getUser()[i], true);
-				}
-				
-				removeChallengers();
-				
-				enemy[b].setVisible(true);
-				
-			}
-			
-			
-		} else if(lp.getStatus() == 5) { //INITIAL BULK OF PLAYERS AFTER LOGIN OR GAME
-			
-			for(int i = 0; i < MAXUSERS_ON_SERVER && i < lp.getUser().length; i++) {
-				
-				enemy[i].setText(lp.getUser()[i]);
-				enemy[i].setForeground(Color.white);
-				enemy[i].setVisible(true);
-				//System.out.println("Reset");
-				
-			}
-			
-		}
-		
 	}
 	
 	private void removeChallengers() {
@@ -262,7 +256,8 @@ public class LobbyPanel extends JPanel {
 				if(((JButton) e.getSource()).getForeground().getRGB() == YELLOW.getRGB()) {
 					
 					System.out.println("ACCEPT");
-					oMan.sendData(new LobbyPackage(nem, 1)); //ACCEPT FIGHT
+					lastPack = new LobbyPackage(nem, 1);
+					oMan.sendData(lastPack); //ACCEPT FIGHT
 					inLobby = false;
 
 					DataPackage dp = null;
@@ -273,7 +268,8 @@ public class LobbyPanel extends JPanel {
 				} else {
 
 					System.out.println("CHALLENGE");
-					oMan.sendData(new LobbyPackage(nem, 2)); //CHALLENGE USER
+					lastPack = new LobbyPackage(nem, 2);
+					oMan.sendData(lastPack); //CHALLENGE USER
 					
 				}
 				
@@ -285,6 +281,17 @@ public class LobbyPanel extends JPanel {
 	};
 	
 	private void newGame(DataPackage dp) {
+		
+		
+		for(int i = 0; !enemy[i].getText().isEmpty(); i++) {
+			
+			enemy[i].setText("");
+			enemy[i].setForeground(Color.white);
+			enemy[i].setVisible(false);
+			
+		}
+		
+		challengers = new ConcurrentHashMap<String, Boolean>();
 		
 		game.getWindow().setRunning(true);
 		game.getWindow().getPanel().setOnline(true);

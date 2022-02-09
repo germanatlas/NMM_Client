@@ -20,29 +20,6 @@ public class OnlineManager {
 		
 		createClient();
 		
-		if(activeClient) {
-			
-			new Thread(() -> {
-				
-				while(true) {
-					
-					if(activeClient) {
-						
-						while(client.getIfActive());
-						client.stopClient();
-						activeClient = false;
-						//System.out.println("Connection to Server ended.");
-						
-					}
-					
-				}
-				
-			}).start();
-			
-		}
-		
-		//init = true;
-		
 	}
 	
 	public void sendData(Object data) {

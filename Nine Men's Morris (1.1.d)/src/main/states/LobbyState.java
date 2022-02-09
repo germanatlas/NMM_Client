@@ -3,31 +3,67 @@ package main.states;
 import java.awt.Graphics;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import main.game.Game;
+import main.graphics.LobbyPanel;
 
 public class LobbyState extends State{
-
-	private JButton[] enemy;
 	
 	private final int id = 4;
+	private JFrame lobbyFrame;
+	private LobbyPanel lobbyPanel;
+	
+	private JButton startButton, 
+					continueButton, 
+					optionButton, 
+					closeButton,
+					joinButton,
+					exitButton,
+					loginButton,
+					registerButton;
 	
 	public LobbyState(Game game) {
 		super(game);
 		
-		this.enemy = null; //TODO
+
+		startButton = game.getWindow().getStartButton();
+		continueButton = game.getWindow().getContinueButton();
+		joinButton = game.getWindow().getJoinButton();
+		optionButton = game.getWindow().getOptionButton();
+		closeButton = game.getWindow().getCloseButton();
+		exitButton = game.getWindow().getExitButton();
+		loginButton = game.getWindow().getLoginButtton();
+		registerButton = game.getWindow().getRegisterButton();
+		
+		lobbyFrame = game.getWindow().getLobbyFrame();
+		lobbyPanel = game.getWindow().getLobbyPanel();
+		lobbyFrame.setVisible(true);
+		lobbyPanel.setVisible(true);
+		lobbyPanel.run();
 		
 	}
 
 	@Override
 	public void tick() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	@Override
 	public void render(Graphics g) {
-		// TODO Auto-generated method stub
+
+		lobbyFrame.setVisible(true);
+		startButton.setVisible(false);
+		continueButton.setVisible(false);
+		joinButton.setVisible(true);
+		optionButton.setVisible(false);
+		exitButton.setVisible(true);
+		closeButton.setVisible(true);
+		loginButton.setVisible(false);
+		registerButton.setVisible(false);
+		
 		
 	}
 	

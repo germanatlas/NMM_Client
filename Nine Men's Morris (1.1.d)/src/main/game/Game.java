@@ -128,9 +128,12 @@ public class Game implements Runnable{
 				}
 			}
 				
+			
 			for (int i = 0; i < 9; i++) {
-				window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
-				window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+				try {
+					window.getPanel().getPlayerOne()[i].move(140, 50 + i * 70);
+					window.getPanel().getPlayerTwo()[i].move(820, 50 + i * 70);
+				} catch(NullPointerException e) { }
 			}
 				
 			window.getPanel().reset(color);

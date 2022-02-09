@@ -3,6 +3,7 @@ package main.states;
 import java.awt.Graphics;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -32,6 +33,8 @@ public class GameState extends State{
 	
 	private JPanel panel;
 	
+	private JFrame lobbyFrame;
+	
 	private boolean	escapePressed;
 	
 	private final int id = 2;
@@ -46,6 +49,8 @@ public class GameState extends State{
 		this.closeButton = game.getWindow().getCloseButton();
 		this.optionButton = game.getWindow().getOptionButton();
 		this.exitbButton = game.getWindow().getExitButton();
+		
+		lobbyFrame = game.getWindow().getLobbyFrame();
 		
 		uNameTF = game.getWindow().getUNameTF();
 		passTF = game.getWindow().getPassTF();
@@ -91,6 +96,8 @@ public class GameState extends State{
 		
 		uNameTF.setVisible(false);
 		passTF.setVisible(false);
+		
+		lobbyFrame.setVisible(false);
 		
 	}
 	

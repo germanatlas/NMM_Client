@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -32,12 +33,15 @@ public class MenuState extends State {
 	private JTextField	uNameTF,
 						passTF;
 	
+	private JFrame lobbyFrame;
+	
 	private final int id = 1;
 	
 	public MenuState(Game game) {
 		super(game);
 		
 	
+		lobbyFrame = game.getWindow().getLobbyFrame();
 		startButton = game.getWindow().getStartButton();
 		continueButton = game.getWindow().getContinueButton();
 		joinButton = game.getWindow().getJoinButton();
@@ -88,6 +92,7 @@ public class MenuState extends State {
 		loginButton.setVisible(false);
 		registerButton.setVisible(false);
 		panel.setVisible(true);
+		lobbyFrame.setVisible(false);
 	
 	}
 	

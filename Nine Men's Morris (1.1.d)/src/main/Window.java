@@ -26,6 +26,7 @@ import main.online.OnlineManager;
 import main.online.packs.DataPackage;
 import main.online.packs.LoginPackage;
 import main.states.EndState;
+import main.states.LobbyState;
 import main.states.State;
 
 public class Window extends JFrame{
@@ -342,80 +343,79 @@ public class Window extends JFrame{
 							return;
 							
 						}
+						
 						oMan = new OnlineManager(game);
 						oMan.sendData(new LoginPackage(username, password, loginreg?0:1));
-						if(oMan.getIfActive()) {
-							LoginPackage lp = null;
-							
-							while((lp = (LoginPackage) oMan.receiveData()) == null);
-							if(lp.getIfNewAccount() == 2) {
-								
-								//TODO frame für gegnersuche
-								isOnline = true;
-								wasOnline = true;
-								lobby.setOnlineManager(oMan);
-								enemySelection.setVisible(true);
-								optionButton.setEnabled(false);
-								lobby.run();
-								
-							}
-							
-							else {
-								
-								if(lp.getIfNewAccount() == 3) {
 
-									label.setText("This account already exists.");
-									
-								} else if(lp.getIfNewAccount() == 4) {
-									
-									label.setText("Unknown Username");
-									
-								} else if(lp.getIfNewAccount() == 5) {
-									
-									label.setText("Wrong Password");
-									
-								} else if(lp.getIfNewAccount() == 6) {
-									
-									label.setText("Username too long");
-									
-								}else if(lp.getIfNewAccount() == 7) {
-									
-									label.setText("Username too short");
-									
-								}else if(lp.getIfNewAccount() == 8) {
-									
-									label.setText("Illegal Username");
-									
-								} else if(lp.getIfNewAccount() == 9) {
-									
-									label.setText("User already Online");
-									
-								}
-								
-								oMan.endConnection();
-								
-							}
-							/*while(dp == null) {
-								
-								dp = (DataPackage) oMan.receiveData();
-								
-							}
+						LoginPackage lp = null;
+						
+						while((lp = (LoginPackage) oMan.receiveData()) == null);
+						if(lp.getIfNewAccount() == 2) {
 							
-							if(dp.getStatus() == 98) {
-								
-								setRunning(true);
-								isOnline = true;
-								wasOnline = true;
-								panel.setOnlineManager(oMan);
-								panel.setOnline(isOnline);
-
-								panel.setActiveUser(dp.getFromY() % 2 != 1);
-								//Starts a new game, online and which color the local player has
-								game.reset(isOnline, dp.getFromX() % 2 == 1);
-								
-							}*/
+							//TODO frame für gegnersuche
+							isOnline = true;
+							wasOnline = true;
+							lobby.setOnlineManager(oMan);
+							State.setCurrentState(new LobbyState(game));
 							
 						}
+						
+						else {
+							
+							if(lp.getIfNewAccount() == 3) {
+
+								label.setText("This account already exists.");
+								
+							} else if(lp.getIfNewAccount() == 4) {
+								
+								label.setText("Unknown Username");
+								
+							} else if(lp.getIfNewAccount() == 5) {
+								
+								label.setText("Wrong Password");
+								
+							} else if(lp.getIfNewAccount() == 6) {
+								
+								label.setText("Username too long");
+								
+							}else if(lp.getIfNewAccount() == 7) {
+								
+								label.setText("Username too short");
+								
+							}else if(lp.getIfNewAccount() == 8) {
+								
+								label.setText("Illegal Username");
+								
+							} else if(lp.getIfNewAccount() == 9) {
+								
+								label.setText("User already Online");
+								
+							}
+							
+							oMan.endConnection();
+							
+						}
+						/*while(dp == null) {
+							
+							dp = (DataPackage) oMan.receiveData();
+							
+						}
+						
+						if(dp.getStatus() == 98) {
+							
+							setRunning(true);
+							isOnline = true;
+							wasOnline = true;
+							panel.setOnlineManager(oMan);
+							panel.setOnline(isOnline);
+
+							panel.setActiveUser(dp.getFromY() % 2 != 1);
+							//Starts a new game, online and which color the local player has
+							game.reset(isOnline, dp.getFromX() % 2 == 1);
+							
+						}*/
+						
+					
 						
 					}
 					
@@ -431,10 +431,9 @@ public class Window extends JFrame{
 						
 						if(wasOnline) {
 							oMan.sendData(new DataPackage(99, 0, 0, 0, 0)); //TODO
-							oMan.endConnection();
 						}
 						running = false;
-						State.setCurrentState(new EndState(game, false));
+						State.setCurrentState(new LobbyState(game));
 						
 					} else {
 						
@@ -682,13 +681,6 @@ public class Window extends JFrame{
 		optionButton.setEnabled(!isOnline);
 		startButton.setEnabled(!isOnline);
 		
-		if(lobby.getLobbyStatus()) {
-			lobby.tick();
-		} else {
-			enemySelection.setVisible(false);
-		}
-		
-		
 	}
 	
 	public JFrame getFrame() {
@@ -836,6 +828,14 @@ public class Window extends JFrame{
 	
 	public String getUsername() {
 		return username;
+	}
+
+	public JFrame getLobbyFrame() {
+		return enemySelection;
+	}
+
+	public LobbyPanel getLobbyPanel() {
+		return lobby;
 	}
 	
 }

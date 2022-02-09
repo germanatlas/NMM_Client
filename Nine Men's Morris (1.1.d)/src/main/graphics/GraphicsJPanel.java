@@ -16,6 +16,7 @@ import main.online.OnlineManager;
 import main.online.packs.DataPackage;
 import main.states.EndState;
 import main.states.GameState;
+import main.states.LobbyState;
 import main.states.MenuState;
 import main.states.State;
 
@@ -652,7 +653,17 @@ public class GraphicsJPanel extends JPanel {
 	
 	private void getOnlineData() {//TODO
 		
-		DataPackage dp = (DataPackage) oMan.receiveData();
+		DataPackage dp = null;
+		
+		try {
+			
+			dp = (DataPackage) oMan.receiveData();
+			
+		} catch(ClassCastException e) {
+			
+			State.setCurrentState(new LobbyState(game));
+			
+		}
 		
 		if(dp == null) {
 			
@@ -728,8 +739,8 @@ public class GraphicsJPanel extends JPanel {
 		} else if(s == 99) {
 			
 			endID = 5;
-			endState = new EndState(game, true);
-			State.setCurrentState(endState);
+			oMan.sendData(new DataPackage(0, 0, 0, 0, 0));
+			State.setCurrentState(new LobbyState(game));
 			
 		} else if(s == 23) { //YOU WIN
 			

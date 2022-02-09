@@ -21,6 +21,7 @@ public class Client {
 	private Socket client;
 	private boolean isInitiated = false;
 	
+	
 	public Client(String address, int port) throws UnknownHostException, IOException {
 		
 		//System.out.println("Starting Client...");
@@ -59,13 +60,12 @@ public class Client {
 				//idk, just many bytes as buffer
 				byte[] buffer = new byte[2048];
 				count = in.read(buffer);
-				//System.out.println(count + " Bytes Received.");
 				
 				byte[] pack = new byte[count];
 				pack = shorten(buffer, count);
 				Object obj = toObject(pack);
-				
-				System.out.println(obj.getClass().toString());
+
+				System.out.println(count + " Bytes received as " + obj.getClass());
 				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
@@ -88,7 +88,7 @@ public class Client {
 				byte[] bytes = toBytes(data);
 				out.write(bytes);
 				out.flush();
-				//System.out.println(bytes.length + " Bytes Sent.");
+				System.out.println(bytes.length + " Bytes sent as " + data.getClass());
 			} catch (IOException e) {
 				//System.out.println("Sending Error:\n" + e);
 			}
