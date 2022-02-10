@@ -651,7 +651,7 @@ public class GraphicsJPanel extends JPanel {
 		
 	}
 	
-	private void getOnlineData() {//TODO
+	private void getOnlineData() {
 		
 		DataPackage dp = null;
 		
@@ -760,6 +760,8 @@ public class GraphicsJPanel extends JPanel {
 				
 			}
 			
+			State.setCurrentState(new LobbyState(game));
+			
 		} else if(s == 24) { //NMY WIN
 
 			if(placingPhase) {
@@ -777,6 +779,8 @@ public class GraphicsJPanel extends JPanel {
 				State.setCurrentState(endState);
 				
 			}
+
+			State.setCurrentState(new LobbyState(game));
 			
 		} else if(s == 8) {
 
@@ -784,6 +788,9 @@ public class GraphicsJPanel extends JPanel {
 			stalemateOnline = true;
 			endState = new EndState(game);
 			State.setCurrentState(endState);
+			
+
+			State.setCurrentState(new LobbyState(game));
 			
 			
 		}
@@ -1091,7 +1098,6 @@ public class GraphicsJPanel extends JPanel {
 	
 	public void reset(boolean color) {
 		
-		System.out.println("New Game");
 		this.repetition = 0;
 		this.repetitiveField = new ArrayList<String>();
 		this.roundsWithoutMill = 0;

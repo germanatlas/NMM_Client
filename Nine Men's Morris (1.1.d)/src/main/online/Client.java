@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.time.LocalTime;
 
 public class Client {
 
@@ -65,7 +66,7 @@ public class Client {
 				pack = shorten(buffer, count);
 				Object obj = toObject(pack);
 
-				System.out.println(count + " Bytes received as " + obj.getClass());
+				//System.out.println(LocalTime.now() + " Package received as " + obj.getClass());
 				
 				return obj;
 			} catch (IOException | ClassNotFoundException e) {
@@ -88,7 +89,7 @@ public class Client {
 				byte[] bytes = toBytes(data);
 				out.write(bytes);
 				out.flush();
-				System.out.println(bytes.length + " Bytes sent as " + data.getClass());
+				//System.out.println(bytes.length + " Bytes sent as " + data.getClass());
 			} catch (IOException e) {
 				//System.out.println("Sending Error:\n" + e);
 			}

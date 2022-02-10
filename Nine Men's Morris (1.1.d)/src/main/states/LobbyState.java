@@ -4,14 +4,11 @@ import java.awt.Graphics;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-
 import main.game.Game;
 import main.graphics.LobbyPanel;
 
 public class LobbyState extends State{
 	
-	private final int id = 4;
 	private JFrame lobbyFrame;
 	private LobbyPanel lobbyPanel;
 	
@@ -65,10 +62,6 @@ public class LobbyState extends State{
 		registerButton.setVisible(false);
 		
 		
-	}
-	
-	public int getID() {
-		return this.id;
 	}
 
 }

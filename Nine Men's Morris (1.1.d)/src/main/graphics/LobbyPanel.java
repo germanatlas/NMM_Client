@@ -81,11 +81,10 @@ public class LobbyPanel extends JPanel {
 				
 				if(!inLobby) {
 					newGame((DataPackage) p);
-					System.out.println("AAAAAAAAAAAAAAAAAAAAAA");
 					break;
 				}
 				LobbyPackage lp = (LobbyPackage) p;
-				//System.out.println("FICK DIESE SCHEIßE, ES SOLL FUNKTIONIEREN " + lp.getStatus() + " " + lp.getUser().length);
+				
 				if(lp.getStatus() == 2) { //CHALLENGE
 					
 					try {
@@ -146,7 +145,6 @@ public class LobbyPanel extends JPanel {
 						enemy[i].setText(lp.getUser()[i]);
 						enemy[i].setForeground(Color.white);
 						enemy[i].setVisible(true);
-						//System.out.println("Reset");
 						
 					}
 					
@@ -222,7 +220,6 @@ public class LobbyPanel extends JPanel {
 		
 		for(String n : names) {
 
-			System.out.println(n + " " + challengers.get(n));
 			if(!challengers.get(n)) {
 				
 				challengers.remove(n);
@@ -255,19 +252,18 @@ public class LobbyPanel extends JPanel {
 				
 				if(((JButton) e.getSource()).getForeground().getRGB() == YELLOW.getRGB()) {
 					
-					System.out.println("ACCEPT");
 					lastPack = new LobbyPackage(nem, 1);
 					oMan.sendData(lastPack); //ACCEPT FIGHT
 					inLobby = false;
 
 					DataPackage dp = null;
 					while((dp = (DataPackage) oMan.receiveData()) == null);
+					
 					challengers = new ConcurrentHashMap<String, Boolean>();
 					newGame(dp);
 					
 				} else {
 
-					System.out.println("CHALLENGE");
 					lastPack = new LobbyPackage(nem, 2);
 					oMan.sendData(lastPack); //CHALLENGE USER
 					
@@ -296,7 +292,6 @@ public class LobbyPanel extends JPanel {
 		game.getWindow().setRunning(true);
 		game.getWindow().getPanel().setOnline(true);
 		game.getWindow().getPanel().setOnlineManager(oMan);
-		System.out.println(dp.getFromX() + " " + dp.getFromY());
 		game.getWindow().getPanel().setActiveUser(dp.getFromY() % 2 != 1);
 		game.reset(true, dp.getFromX() % 2 == 1);
 		

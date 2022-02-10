@@ -3,7 +3,6 @@ package main.states;
 import java.awt.Graphics;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -39,8 +38,6 @@ public class OptionsState extends State {
 						passTF;
 
 	private boolean escapePressed;
-	
-	private final int id = 3;
 	
 	public OptionsState(Game game) {
 		super(game);
@@ -95,10 +92,6 @@ public class OptionsState extends State {
 			
 		}
 		
-	}
-	
-	public int getID() {
-		return this.id;
 	}
 
 }

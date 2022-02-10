@@ -25,7 +25,6 @@ import main.graphics.MyJPanel;
 import main.online.OnlineManager;
 import main.online.packs.DataPackage;
 import main.online.packs.LoginPackage;
-import main.states.EndState;
 import main.states.LobbyState;
 import main.states.State;
 
